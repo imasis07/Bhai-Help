@@ -1,0 +1,11 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="48" height="48" rx="12" fill="hsl(199, 89%, 14%)"/>
+  <rect x="1" y="1" width="46" height="46" rx="11" stroke="hsl(199, 89%, 48%)" stroke-width="1.5" stroke-opacity="0.5"/>
+  <!-- Bar chart icon -->
+  <rect x="10" y="28" width="6" height="10" rx="2" fill="hsl(199, 89%, 48%)" opacity="0.6"/>
+  <rect x="19" y="20" width="6" height="18" rx="2" fill="hsl(199, 89%, 48%)" opacity="0.8"/>
+  <rect x="28" y="14" width="6" height="24" rx="2" fill="hsl(199, 89%, 48%)"/>
+  <!-- Trend line -->
+  <polyline points="13,30 22,22 31,16" stroke="hsl(199, 89%, 70%)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="31" cy="16" r="2.5" fill="hsl(199, 89%, 70%)"/>
+</svg>
