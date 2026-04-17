@@ -8,6 +8,7 @@ import Home from "@/pages/home";
 import PricingPage from "@/pages/pricing";
 import OnboardingPage from "@/pages/onboarding";
 import ConnectStorePage from "@/pages/connect-store";
+import InstallPixelPage from "@/pages/install-pixel";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
@@ -255,6 +256,7 @@ function UserDashboard() {
                 <button
                   onClick={() => {
                     if (step.num === 1) setLocation("/connect-store");
+                    if (step.num === 2) setLocation("/install-pixel");
                   }}
                   className="shrink-0 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all"
                   style={{
@@ -360,6 +362,7 @@ function ClerkProviderWithRoutes() {
             <Route path="/onboarding" component={OnboardingPage} />
             <Route path="/dashboard" component={DashboardPage} />
             <Route path="/connect-store" component={ConnectStorePage} />
+            <Route path="/install-pixel" component={InstallPixelPage} />
             <Route component={NotFound} />
           </Switch>
           <Toaster />
@@ -378,6 +381,7 @@ function PublicOnlyRoutes() {
           <Route path="/pricing" component={PricingPage} />
           <Route path="/dashboard" component={DashboardPage} />
           <Route path="/connect-store" component={ConnectStorePage} />
+          <Route path="/install-pixel" component={InstallPixelPage} />
           <Route component={NotFound} />
         </Switch>
         <Toaster />
