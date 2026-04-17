@@ -1,0 +1,68 @@
+Mera dashboard almost ready hai. Neeche diye gaye improvements apply karo. Sirf UI changes karna hai, backend ki zaroorat nahi hai.
+
+## Improvement 1: Y-axis Labels Fix
+Sales Over Time chart mein Y-axis labels galat hai (₹9L). Isko sahi karo:
+
+**Current:** ₹₆₀L, ₹₄₅L, ₹₃₀L, ₹₁₅L, ₹₉L
+**Change to:** ₹60L, ₹45L, ₹30L, ₹15L, ₹0
+
+Ya fir: ₹60L, ₹45L, ₹30L, ₹15L, ₹0 rakhna. ₹9L hatao.
+
+## Improvement 2: Top Influencers mein ROAS Add
+Top Influencers list mein sirf sales dikh raha hai. ROAS bhi dikhao.
+
+**Current:** @ayesha_lifestyle — ₹1.2Cr
+**Change to:** @ayesha_lifestyle — ₹1.2Cr | ROAS 8.4x
+
+**All influencers ke saath ROAS add karo:**
+- @ayesha_lifestyle: ₹1.2Cr, ROAS 8.4x
+- @techwithrahul: ₹82.0L, ROAS 5.2x
+- @priya_beauty: ₹65.0L, ROAS 4.8x
+- @delhifoodie: ₹42.0L, ROAS 3.2x
+
+## Improvement 3: Attribution Chart Colors Consistent
+Attribution chart mein colors consistent karo:
+
+- Link Click: Blue (#3B82F6)
+- Search: Purple (#8B5CF6)
+- WhatsApp: Orange (#F97316)
+- DM: Green (#10B981)
+
+Pie chart ya donut chart mein ye colors use karo.
+
+## Improvement 4: Recent Activity Timestamp Format
+Recent Activity mein "+" ki jagah "—" ya "·" use karo.
+
+**Current:** ₹12,400 + 2 min ago
+**Change to:** ₹12,400 — 2 min ago
+
+**Ya:** ₹12,400 · 2 min ago
+
+## Improvement 5: Sidebar Active Item Highlight
+Sidebar mein currently jis page pe ho, us item ko highlight karo.
+
+Example: Dashboard page pe ho toh "Dashboard" ka background light blue ya different color ho.
+
+## Improvement 6: Stats Cards Hover Effect
+Stats cards pe hover effect add karo — thoda shadow increase ho, ya scale thoda badhe (1.02x).
+
+## Improvement 7: Date Picker Add (Optional)
+"Apr 1 – Apr 17, 2025 — All campaigns" ke aage ek small calendar icon (date picker) add karo. Functionality abhi nahi chahiye, sirf UI dikhna hai.
+
+## Improvement 8: Influencer Avatars
+Top Influencers list mein har influencer ke aage ek avatar/placeholder image add karo (initial ya default icon).
+
+Example: @ayesha_lifestyle ke aage 'AY' ya default user icon.
+
+## Improvement 9: Sales Chart Time Period Active State
+Sales chart ke neeche time period buttons (4W, 6W, 3M, 1Y) mein se "4W" active hai — usko different color highlight karo (blue background, white text).
+
+## Improvement 10: Mobile Responsive Check
+Ensure mobile pe:
+- Sidebar collapse ho jaye (hamburger menu)
+- Stats cards 2x2 grid mein aaye
+- Sales chart scrollable ho
+- Top Influencers aur Attribution chart stack ho jaye
+
+
+Sirf frontend changes karna hai. Fake/mock data same rakhna. Colors aur styling consistent rakhna.
