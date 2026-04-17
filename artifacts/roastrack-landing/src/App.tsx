@@ -289,7 +289,7 @@ function UserDashboard() {
           {/* Footer actions */}
           <div className="flex items-center justify-end gap-3">
             <button
-              onClick={() => setLocation("/")}
+              onClick={() => setLocation("/main-dashboard")}
               className="px-4 py-2 rounded-lg text-sm transition-colors"
               style={{ color: "rgba(255,255,255,0.4)" }}
               onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.7)")}
@@ -298,6 +298,7 @@ function UserDashboard() {
               Skip for now
             </button>
             <button
+              onClick={() => setLocation("/main-dashboard")}
               className="px-5 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
               style={{ background: "hsl(199,89%,48%)", color: "hsl(222,47%,6%)" }}
             >
