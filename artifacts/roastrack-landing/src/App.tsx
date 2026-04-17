@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/home";
 import PricingPage from "@/pages/pricing";
 import OnboardingPage from "@/pages/onboarding";
+import ConnectStorePage from "@/pages/connect-store";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
@@ -170,7 +171,7 @@ const STEPS = [
 function UserDashboard() {
   const { user } = useUser();
   const [, setLocation] = useLocation();
-  const firstName = user?.firstName || user?.unsafeMetadata?.storeName as string || "there";
+  const firstName = (user?.firstName || user?.unsafeMetadata?.storeName as string) || "there";
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "hsl(222, 47%, 6%)" }}>
@@ -252,6 +253,9 @@ function UserDashboard() {
 
                 {/* Action button */}
                 <button
+                  onClick={() => {
+                    if (step.num === 1) setLocation("/connect-store");
+                  }}
                   className="shrink-0 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all"
                   style={{
                     background: "rgba(14,165,233,0.12)",
@@ -355,6 +359,7 @@ function ClerkProviderWithRoutes() {
             <Route path="/sign-up/*?" component={SignUpPage} />
             <Route path="/onboarding" component={OnboardingPage} />
             <Route path="/dashboard" component={DashboardPage} />
+            <Route path="/connect-store" component={ConnectStorePage} />
             <Route component={NotFound} />
           </Switch>
           <Toaster />
@@ -371,6 +376,8 @@ function PublicOnlyRoutes() {
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/pricing" component={PricingPage} />
+          <Route path="/dashboard" component={DashboardPage} />
+          <Route path="/connect-store" component={ConnectStorePage} />
           <Route component={NotFound} />
         </Switch>
         <Toaster />
