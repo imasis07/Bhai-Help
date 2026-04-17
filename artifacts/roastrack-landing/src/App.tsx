@@ -9,6 +9,7 @@ import PricingPage from "@/pages/pricing";
 import OnboardingPage from "@/pages/onboarding";
 import ConnectStorePage from "@/pages/connect-store";
 import InstallPixelPage from "@/pages/install-pixel";
+import AddInfluencerPage from "@/pages/add-influencer";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
@@ -257,6 +258,7 @@ function UserDashboard() {
                   onClick={() => {
                     if (step.num === 1) setLocation("/connect-store");
                     if (step.num === 2) setLocation("/install-pixel");
+                    if (step.num === 3) setLocation("/add-influencer");
                   }}
                   className="shrink-0 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all"
                   style={{
@@ -363,6 +365,7 @@ function ClerkProviderWithRoutes() {
             <Route path="/dashboard" component={DashboardPage} />
             <Route path="/connect-store" component={ConnectStorePage} />
             <Route path="/install-pixel" component={InstallPixelPage} />
+            <Route path="/add-influencer" component={AddInfluencerPage} />
             <Route component={NotFound} />
           </Switch>
           <Toaster />
@@ -382,6 +385,7 @@ function PublicOnlyRoutes() {
           <Route path="/dashboard" component={DashboardPage} />
           <Route path="/connect-store" component={ConnectStorePage} />
           <Route path="/install-pixel" component={InstallPixelPage} />
+          <Route path="/add-influencer" component={AddInfluencerPage} />
           <Route component={NotFound} />
         </Switch>
         <Toaster />
