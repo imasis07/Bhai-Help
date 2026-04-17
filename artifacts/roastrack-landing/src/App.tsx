@@ -10,6 +10,7 @@ import OnboardingPage from "@/pages/onboarding";
 import ConnectStorePage from "@/pages/connect-store";
 import InstallPixelPage from "@/pages/install-pixel";
 import AddInfluencerPage from "@/pages/add-influencer";
+import MainDashboard from "@/pages/main-dashboard";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
@@ -366,6 +367,7 @@ function ClerkProviderWithRoutes() {
             <Route path="/connect-store" component={ConnectStorePage} />
             <Route path="/install-pixel" component={InstallPixelPage} />
             <Route path="/add-influencer" component={AddInfluencerPage} />
+            <Route path="/main-dashboard" component={MainDashboard} />
             <Route component={NotFound} />
           </Switch>
           <Toaster />
@@ -386,6 +388,7 @@ function PublicOnlyRoutes() {
           <Route path="/connect-store" component={ConnectStorePage} />
           <Route path="/install-pixel" component={InstallPixelPage} />
           <Route path="/add-influencer" component={AddInfluencerPage} />
+          <Route path="/main-dashboard" component={MainDashboard} />
           <Route component={NotFound} />
         </Switch>
         <Toaster />

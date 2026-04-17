@@ -1,5 +1,6 @@
 import { motion, useAnimation } from "framer-motion";
 import { useEffect } from "react";
+import { Link } from "wouter";
 import { ArrowRight, Play, TrendingUp, Users, DollarSign, Target, Instagram, Youtube } from "lucide-react";
 
 const influencers = [
@@ -218,13 +219,13 @@ export default function Hero() {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="flex flex-wrap gap-3 mb-8"
             >
-              <a
-                href="#pricing"
+              <Link
+                href="/main-dashboard"
                 className="flex items-center gap-2 bg-primary text-primary-foreground font-semibold px-6 py-3 rounded-xl hover:bg-primary/90 transition-all duration-200 hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5"
               >
                 Get Started
                 <ArrowRight className="w-4 h-4" />
-              </a>
+              </Link>
               <a
                 href="#"
                 className="flex items-center gap-2 border border-violet-500/60 bg-violet-500/10 text-violet-300 font-medium px-6 py-3 rounded-xl hover:bg-violet-500/20 hover:border-violet-400 transition-all duration-200 hover:-translate-y-0.5"
