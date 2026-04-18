@@ -1,38 +1,25 @@
-import { useState, useEffect } from "react";
-import { useUser } from "@clerk/react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { Store, ArrowRight, BarChart3 } from "lucide-react";
 
 export default function OnboardingPage() {
-  const { user, isLoaded } = useUser();
   const [, setLocation] = useLocation();
   const [storeName, setStoreName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (isLoaded && !user) setLocation("/sign-in");
-  }, [isLoaded, user, setLocation]);
-
-  if (!isLoaded || !user) return null;
-
-  const handleConfirm = async () => {
+  const handleConfirm = () => {
     if (!storeName.trim()) {
       setError("Please enter your store name.");
       return;
     }
     setLoading(true);
     setError("");
-    try {
-      await user.update({
-        unsafeMetadata: { storeName: storeName.trim() },
-      });
-      setLocation("/dashboard");
-    } catch {
-      setError("Something went wrong. Please try again.");
+    setTimeout(() => {
       setLoading(false);
-    }
+      setLocation("/dashboard");
+    }, 800);
   };
 
   return (
