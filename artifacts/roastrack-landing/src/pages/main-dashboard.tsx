@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Target, Users, BarChart2, Code2, Settings,
   Search, Bell, ShoppingCart, Megaphone, CheckCircle2, TrendingUp,
   ArrowUpRight, ChevronRight, Star, Zap, Calendar, Menu, X,
-  Eye, Link2, MessageCircle, Mail,
+  Eye, Link2, MessageCircle, Mail, Download, ChevronDown, FileText,
 } from "lucide-react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -612,6 +612,280 @@ function InfluencersSection() {
   );
 }
 
+/* ─── Reports Section component ─── */
+function ReportsSection() {
+  const [exportOpen, setExportOpen] = useState(false);
+
+  const reportCards = [
+    {
+      Icon: BarChart2,
+      iconColor: PRIMARY,
+      iconBg: "rgba(14,165,233,0.12)",
+      type: "Campaign Performance Report",
+      name: "Summer Sale",
+      period: "Apr 1-30, 2025",
+      kind: "metrics",
+      rows: [
+        { label: "Total Sales",  value: "₹2.5L",  green: true  },
+        { label: "ROAS",         value: "5.2x",   green: false },
+        { label: "Influencers",  value: "5",      green: false },
+        { label: "Views",        value: "1.2L",   green: false },
+        { label: "Clicks",       value: "2.8K",   green: false },
+      ],
+      ranked: null,
+    },
+    {
+      Icon: BarChart2,
+      iconColor: PURPLE,
+      iconBg: "rgba(139,92,246,0.12)",
+      type: "Campaign Performance Report",
+      name: "Winter Collection",
+      period: "Apr 1-30, 2025",
+      kind: "metrics",
+      rows: [
+        { label: "Total Sales",  value: "₹1.8L",  green: true  },
+        { label: "ROAS",         value: "6.0x",   green: false },
+        { label: "Influencers",  value: "3",      green: false },
+        { label: "Views",        value: "85K",    green: false },
+        { label: "Clicks",       value: "1.6K",   green: false },
+      ],
+      ranked: null,
+    },
+    {
+      Icon: Users,
+      iconColor: "hsl(45,100%,60%)",
+      iconBg: "rgba(234,179,8,0.12)",
+      type: "Influencer Performance Report",
+      name: "Top Influencers",
+      period: "Apr 1-30, 2025",
+      kind: "ranked",
+      rows: null,
+      ranked: [
+        { rank: 1, handle: "@ayesha_lifestyle", sales: "₹12.4L" },
+        { rank: 2, handle: "@techwithrahul",    sales: "₹8.2L"  },
+        { rank: 3, handle: "@priya_beauty",     sales: "₹6.5L"  },
+        { rank: 4, handle: "@delhifoodie",      sales: "₹4.2L"  },
+      ],
+    },
+    {
+      Icon: TrendingUp,
+      iconColor: GREEN,
+      iconBg: "rgba(34,197,94,0.12)",
+      type: "Influencer Performance Report",
+      name: "All Influencers",
+      period: "Apr 1-30, 2025",
+      kind: "metrics",
+      rows: [
+        { label: "Total Sales",   value: "₹31.3L", green: true  },
+        { label: "Avg ROAS",      value: "5.4x",   green: false },
+        { label: "Total Views",   value: "1.2L",   green: false },
+        { label: "Total Clicks",  value: "2.9K",   green: false },
+      ],
+      ranked: null,
+    },
+  ];
+
+  const attrChannels = [
+    { Icon: Link2,         label: "Link Click", value: "38%", color: "#3B82F6" },
+    { Icon: Search,        label: "Search",     value: "29%", color: "#8B5CF6" },
+    { Icon: MessageCircle, label: "WhatsApp",   value: "18%", color: "#F97316" },
+    { Icon: Mail,          label: "DM",         value: "15%", color: GREEN     },
+  ];
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} className="space-y-5">
+
+      {/* ── Page header ── */}
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-xl font-bold text-white">Reports</h1>
+          <p className="text-sm mt-0.5" style={{ color: DIM }}>Download your influencer performance data</p>
+        </div>
+        <div className="relative">
+          <button
+            onClick={() => setExportOpen(o => !o)}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
+            style={{ background: PRIMARY, color: "hsl(222,47%,6%)" }}
+          >
+            <Download className="w-4 h-4" />
+            Export
+            <ChevronDown className="w-3.5 h-3.5" />
+          </button>
+          {exportOpen && (
+            <div
+              className="absolute right-0 top-full mt-2 w-44 rounded-xl overflow-hidden z-20 py-1"
+              style={{ background: CARD, border: `1px solid ${BORDER}`, boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }}
+            >
+              {["Export as CSV", "Export as PDF", "Export as XLSX"].map(opt => (
+                <button
+                  key={opt}
+                  onClick={() => setExportOpen(false)}
+                  className="w-full text-left px-4 py-2.5 text-sm transition-colors"
+                  style={{ color: DIM }}
+                  onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.color = "white"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = DIM; }}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Date Range filter ── */}
+      <div className="flex items-center gap-3 flex-wrap px-4 py-3 rounded-2xl" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+        <Calendar className="w-4 h-4 shrink-0" style={{ color: DIM2 }} />
+        <span className="text-sm shrink-0" style={{ color: DIM }}>Date Range:</span>
+        <div className="flex items-center gap-2 flex-wrap flex-1">
+          <input
+            type="date"
+            defaultValue="2025-04-01"
+            className="text-sm px-3 py-1.5 rounded-lg outline-none"
+            style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${BORDER}`, color: "white" }}
+          />
+          <span style={{ color: DIM2 }}>—</span>
+          <input
+            type="date"
+            defaultValue="2025-04-30"
+            className="text-sm px-3 py-1.5 rounded-lg outline-none"
+            style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${BORDER}`, color: "white" }}
+          />
+        </div>
+        <button
+          className="px-4 py-1.5 rounded-lg text-sm font-semibold transition-all hover:opacity-90 shrink-0"
+          style={{ background: PRIMARY, color: "hsl(222,47%,6%)" }}
+        >
+          Apply
+        </button>
+      </div>
+
+      {/* ── 2×2 Report Cards Grid ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {reportCards.map((card, i) => {
+          const CardIcon = card.Icon;
+          return (
+            <motion.div
+              key={card.name}
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, delay: i * 0.07 }}
+              className="rounded-2xl p-5 flex flex-col"
+              style={{ background: CARD, border: `1px solid ${BORDER}` }}
+            >
+              {/* Card header */}
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: card.iconBg }}>
+                  <CardIcon className="w-4 h-4" style={{ color: card.iconColor }} />
+                </div>
+                <div>
+                  <div className="text-[11px] font-medium leading-none mb-0.5" style={{ color: DIM2 }}>{card.type}</div>
+                  <div className="text-sm font-bold text-white leading-tight">{card.name}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs mb-3" style={{ color: DIM2 }}>
+                <Calendar className="w-3 h-3" />
+                {card.period}
+              </div>
+              <div className="h-px mb-3" style={{ background: "rgba(255,255,255,0.06)" }} />
+
+              {/* Rows — metrics */}
+              {card.kind === "metrics" && card.rows && (
+                <div className="space-y-2.5 flex-1">
+                  {card.rows.map(({ label, value, green }) => (
+                    <div key={label} className="flex items-center justify-between">
+                      <span className="text-xs" style={{ color: DIM2 }}>{label}</span>
+                      <span className="text-xs font-bold" style={{ color: green ? GREEN : "rgba(255,255,255,0.85)" }}>{value}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Rows — ranked list */}
+              {card.kind === "ranked" && card.ranked && (
+                <div className="space-y-2.5 flex-1">
+                  {card.ranked.map(({ rank, handle, sales }) => (
+                    <div key={handle} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+                          style={{
+                            background: rank === 1 ? "rgba(234,179,8,0.15)" : "rgba(255,255,255,0.05)",
+                            color: rank === 1 ? "hsl(45,100%,60%)" : DIM2,
+                          }}
+                        >
+                          {rank}
+                        </div>
+                        <span className="text-xs" style={{ color: DIM }}>{handle}</span>
+                      </div>
+                      <span className="text-xs font-bold" style={{ color: GREEN }}>{sales}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="h-px my-3" style={{ background: "rgba(255,255,255,0.06)" }} />
+              <button
+                className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-semibold transition-all hover:opacity-80"
+                style={{ background: "rgba(14,165,233,0.08)", color: PRIMARY, border: `1px solid rgba(14,165,233,0.18)` }}
+              >
+                <Download className="w-3.5 h-3.5" />
+                Download CSV
+              </button>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* ── Attribution Summary ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, delay: 0.32 }}
+        className="rounded-2xl p-5"
+        style={{ background: CARD, border: `1px solid ${BORDER}` }}
+      >
+        <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "rgba(14,165,233,0.12)" }}>
+              <FileText className="w-4 h-4" style={{ color: PRIMARY }} />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-white">Attribution Summary</div>
+              <div className="text-xs" style={{ color: DIM2 }}>All Campaigns · Apr 1-30, 2025</div>
+            </div>
+          </div>
+          <button
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all hover:opacity-80"
+            style={{ background: "rgba(14,165,233,0.08)", color: PRIMARY, border: `1px solid rgba(14,165,233,0.18)` }}
+          >
+            <Download className="w-3 h-3" />
+            Download CSV
+          </button>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {attrChannels.map(({ Icon, label, value, color }) => (
+            <div
+              key={label}
+              className="flex items-center gap-3 px-4 py-3 rounded-xl"
+              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+            >
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${color}20` }}>
+                <Icon className="w-3.5 h-3.5" style={{ color }} />
+              </div>
+              <div>
+                <div className="text-xs mb-0.5" style={{ color: DIM2 }}>{label}</div>
+                <div className="text-base font-bold text-white">{value}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </motion.div>
+
+    </motion.div>
+  );
+}
+
 /* ─── Main ─── */
 export default function MainDashboard() {
   const [, setLocation] = useLocation();
@@ -765,8 +1039,11 @@ export default function MainDashboard() {
           {/* ══ INFLUENCERS VIEW ══ */}
           {activeNav === "Influencers" && <InfluencersSection />}
 
+          {/* ══ REPORTS VIEW ══ */}
+          {activeNav === "Reports" && <ReportsSection />}
+
           {/* ══ DASHBOARD VIEW ══ */}
-          {activeNav !== "Campaigns" && activeNav !== "Influencers" && <div className="space-y-4">
+          {activeNav !== "Campaigns" && activeNav !== "Influencers" && activeNav !== "Reports" && <div className="space-y-4">
 
           {/* Page title — Improvement 7: calendar icon */}
           <div className="flex items-center justify-between flex-wrap gap-3">
