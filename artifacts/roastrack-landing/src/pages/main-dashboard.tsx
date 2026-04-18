@@ -471,12 +471,12 @@ function InfluencersSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {filtered.map((inf, i) => {
             const metricRows = [
-              { label: "Views",      Icon: Eye,           value: fmtK(inf.views),     color: PRIMARY,   pct: (inf.views     / metricMaxValues.views)     * 100 },
-              { label: "Link Click", Icon: Link2,         value: fmtK(inf.linkClick), color: "#3B82F6", pct: (inf.linkClick / metricMaxValues.linkClick) * 100 },
-              { label: "Google",     Icon: Search,        value: fmtK(inf.google),    color: "#8B5CF6", pct: (inf.google    / metricMaxValues.google)    * 100 },
-              { label: "WhatsApp",   Icon: MessageCircle, value: fmtK(inf.whatsapp),  color: GREEN,     pct: (inf.whatsapp  / metricMaxValues.whatsapp)  * 100 },
-              { label: "DM",         Icon: Mail,          value: fmtK(inf.dm),        color: "#F97316", pct: (inf.dm        / metricMaxValues.dm)        * 100 },
-              { label: "Sales",      Icon: ShoppingCart,  value: fmt(inf.sales),      color: GREEN,     pct: (inf.sales     / metricMaxValues.sales)     * 100 },
+              { label: "Views",      Icon: Eye,           value: fmtK(inf.views),     color: PRIMARY   },
+              { label: "Link Click", Icon: Link2,         value: fmtK(inf.linkClick), color: "#3B82F6" },
+              { label: "Google",     Icon: Search,        value: fmtK(inf.google),    color: "#8B5CF6" },
+              { label: "WhatsApp",   Icon: MessageCircle, value: fmtK(inf.whatsapp),  color: GREEN     },
+              { label: "DM",         Icon: Mail,          value: fmtK(inf.dm),        color: "#F97316" },
+              { label: "Sales",      Icon: ShoppingCart,  value: fmt(inf.sales),      color: GREEN     },
             ];
             const rc = roasColor(inf.roas);
 
@@ -523,25 +523,24 @@ function InfluencersSection() {
                   </span>
                 </div>
 
-                {/* Metrics — animated bars */}
-                <div className="space-y-1.5">
-                  {metricRows.map(({ label, Icon, value, color, pct }, mi) => (
-                    <div key={label} className="flex items-center gap-2.5">
-                      <div className="flex items-center gap-1.5 shrink-0" style={{ width: 88 }}>
-                        <Icon className="w-3 h-3 shrink-0" style={{ color }} />
-                        <span className="text-[11px] truncate" style={{ color: DIM2 }}>{label}</span>
+                {/* Metrics box */}
+                <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.07)" }}>
+                  {metricRows.map(({ label, Icon, value, color }, mi) => (
+                    <div
+                      key={label}
+                      className="flex items-center justify-between px-3.5 py-2.5"
+                      style={{
+                        background: mi % 2 === 0 ? "rgba(255,255,255,0.025)" : "transparent",
+                        borderBottom: mi < metricRows.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none",
+                      }}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Icon className="w-3.5 h-3.5 shrink-0" style={{ color }} />
+                        <span className="text-xs" style={{ color: DIM2 }}>{label}</span>
                       </div>
-                      <div className="flex-1 h-6 rounded-md relative overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${Math.max(pct, 15)}%` }}
-                          transition={{ duration: 0.75, delay: 0.1 + i * 0.06 + mi * 0.05, ease: [0.16, 1, 0.3, 1] }}
-                          className="absolute inset-y-0 left-0 rounded-md flex items-center justify-end pr-2"
-                          style={{ background: `linear-gradient(90deg, ${color}55, ${color}dd)` }}
-                        >
-                          <span className="text-[10px] font-bold text-white whitespace-nowrap leading-none">{value}</span>
-                        </motion.div>
-                      </div>
+                      <span className="text-xs font-bold" style={{ color: mi === 5 ? GREEN : "rgba(255,255,255,0.85)" }}>
+                        {value}
+                      </span>
                     </div>
                   ))}
                 </div>
