@@ -1,0 +1,69 @@
+## ROASTrack — Project Handoff Prompt
+
+### About this project
+ROASTrack is an influencer ROI tracker SaaS for Indian D2C brands. 
+It is a **100% frontend-only** React + Vite + TypeScript project — 
+NO backend, NO Clerk, NO API keys, NO database needed.
+Must run standalone: `npm install && npm run dev` from the project folder.
+
+### Tech Stack
+- React 19 + TypeScript + Vite 7
+- Tailwind CSS v4
+- Framer Motion (animations)
+- Recharts (charts)
+- Wouter (routing — NOT react-router)
+- Lucide React (icons)
+- @tanstack/react-query
+- All data is hardcoded/mock — no real API calls
+
+### Design Tokens (NEVER change these)
+- Background: hsl(222,47%,6%)
+- Card: hsl(222,47%,9%)
+- Input: hsl(222,47%,12%)
+- Primary (cyan): hsl(199,89%,48%)
+- Border: rgba(14,165,233,0.18)
+- Font: system default, weights 400/500/600/700
+
+### Current Routes (wouter)
+- `/` → Landing page (Hero, Features, Pricing sections)
+- `/sign-in` → Custom login page (Google button on top, then email+password)
+- `/sign-up` → Custom signup page (Google button on top, then email+password, password strength bar)
+- `/verify-email` → 6-digit OTP page with paste support
+- `/onboarding` → Store name input page
+- `/dashboard` → Setup wizard (3 steps: Connect Store, Install Pixel, Add Influencer)
+- `/connect-store` → Connect store page
+- `/install-pixel` → Install pixel page
+- `/add-influencer` → Add influencer page
+- `/main-dashboard` → Full premium dashboard (this is the main screen)
+- `/pricing` → Pricing page
+
+### Main Dashboard (`/main-dashboard`) — Already Built
+Fixed sidebar with: Dashboard, Campaigns, Influencers, Reports, Pixels, Settings + Upgrade nudge
+Fixed header with: search bar, bell icon, user avatar
+Scrollable content with:
+- 4 stat cards (ROAS, Revenue, Influencers, Attribution %)
+- Sales Over Time line chart (Recharts, Y-axis in ₹ lakhs)
+- Top Influencers with ROAS badges + progress bars
+- Traffic Attribution donut chart
+- Recent Activity feed
+
+### Auth Flow (all frontend-only, uses setTimeout to simulate loading)
+Sign Up → OTP Verify → Store Name (onboarding) → Setup Wizard → Main Dashboard
+Sign In → Main Dashboard directly
+
+### STRICT RULES — Follow these always
+1. NEVER modify existing UI unless I explicitly ask
+2. NEVER add Clerk, Auth0, Supabase, Firebase, or any auth library
+3. NEVER add a backend, API server, or database
+4. NEVER change colors, fonts, spacing, or design tokens
+5. NEVER use `react-router-dom` — project uses `wouter`
+6. All new pages must match the dark premium aesthetic
+7. Communication with me will be in Hinglish (Hindi + English mix)
+8. When I say "make a new screen/page", create it as a new file in `src/pages/`
+   and add its route to `App.tsx`
+
+### What to continue
+I will tell you what new screens/features to build next. 
+Wait for my instructions before doing anything. 
+First just confirm you understand the project structure by reading `src/App.tsx` 
+and `src/pages/main-dashboard.tsx`.
