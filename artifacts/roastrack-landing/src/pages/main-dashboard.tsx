@@ -619,45 +619,43 @@ function ReportsSection() {
   const reportCards = [
     {
       Icon: BarChart2,
-      iconColor: PRIMARY,
-      iconBg: "rgba(14,165,233,0.12)",
-      type: "Campaign Performance Report",
+      accentColor: PRIMARY,
+      type: "Campaign",
       name: "Summer Sale",
-      period: "Apr 1-30, 2025",
+      period: "Apr 1–30, 2025",
+      highlight: { label: "Total Sales", value: "₹2.5L" },
       kind: "metrics",
       rows: [
-        { label: "Total Sales",  value: "₹2.5L",  green: true  },
-        { label: "ROAS",         value: "5.2x",   green: false },
-        { label: "Influencers",  value: "5",      green: false },
-        { label: "Views",        value: "1.2L",   green: false },
-        { label: "Clicks",       value: "2.8K",   green: false },
+        { label: "ROAS",        value: "5.2x" },
+        { label: "Influencers", value: "5"    },
+        { label: "Views",       value: "1.2L" },
+        { label: "Clicks",      value: "2.8K" },
       ],
       ranked: null,
     },
     {
       Icon: BarChart2,
-      iconColor: PURPLE,
-      iconBg: "rgba(139,92,246,0.12)",
-      type: "Campaign Performance Report",
+      accentColor: PURPLE,
+      type: "Campaign",
       name: "Winter Collection",
-      period: "Apr 1-30, 2025",
+      period: "Apr 1–30, 2025",
+      highlight: { label: "Total Sales", value: "₹1.8L" },
       kind: "metrics",
       rows: [
-        { label: "Total Sales",  value: "₹1.8L",  green: true  },
-        { label: "ROAS",         value: "6.0x",   green: false },
-        { label: "Influencers",  value: "3",      green: false },
-        { label: "Views",        value: "85K",    green: false },
-        { label: "Clicks",       value: "1.6K",   green: false },
+        { label: "ROAS",        value: "6.0x" },
+        { label: "Influencers", value: "3"    },
+        { label: "Views",       value: "85K"  },
+        { label: "Clicks",      value: "1.6K" },
       ],
       ranked: null,
     },
     {
       Icon: Users,
-      iconColor: "hsl(45,100%,60%)",
-      iconBg: "rgba(234,179,8,0.12)",
-      type: "Influencer Performance Report",
-      name: "Top Influencers",
-      period: "Apr 1-30, 2025",
+      accentColor: "hsl(45,100%,60%)",
+      type: "Influencer",
+      name: "Top Performers",
+      period: "Apr 1–30, 2025",
+      highlight: { label: "Top Earner", value: "₹12.4L" },
       kind: "ranked",
       rows: null,
       ranked: [
@@ -669,43 +667,47 @@ function ReportsSection() {
     },
     {
       Icon: TrendingUp,
-      iconColor: GREEN,
-      iconBg: "rgba(34,197,94,0.12)",
-      type: "Influencer Performance Report",
+      accentColor: GREEN,
+      type: "Influencer",
       name: "All Influencers",
-      period: "Apr 1-30, 2025",
+      period: "Apr 1–30, 2025",
+      highlight: { label: "Total Sales", value: "₹31.3L" },
       kind: "metrics",
       rows: [
-        { label: "Total Sales",   value: "₹31.3L", green: true  },
-        { label: "Avg ROAS",      value: "5.4x",   green: false },
-        { label: "Total Views",   value: "1.2L",   green: false },
-        { label: "Total Clicks",  value: "2.9K",   green: false },
+        { label: "Avg ROAS",     value: "5.4x" },
+        { label: "Total Views",  value: "1.2L" },
+        { label: "Total Clicks", value: "2.9K" },
       ],
       ranked: null,
     },
   ];
 
   const attrChannels = [
-    { Icon: Link2,         label: "Link Click", value: "38%", color: "#3B82F6" },
-    { Icon: Search,        label: "Search",     value: "29%", color: "#8B5CF6" },
-    { Icon: MessageCircle, label: "WhatsApp",   value: "18%", color: "#F97316" },
-    { Icon: Mail,          label: "DM",         value: "15%", color: GREEN     },
+    { Icon: Link2,         label: "Link Click", value: "38%", pct: 38, color: "#3B82F6" },
+    { Icon: Search,        label: "Search",     value: "29%", pct: 29, color: "#8B5CF6" },
+    { Icon: MessageCircle, label: "WhatsApp",   value: "18%", pct: 18, color: "#F97316" },
+    { Icon: Mail,          label: "DM",         value: "15%", pct: 15, color: GREEN     },
   ];
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} className="space-y-5">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} className="space-y-6">
 
       {/* ── Page header ── */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-xl font-bold text-white">Reports</h1>
-          <p className="text-sm mt-0.5" style={{ color: DIM }}>Download your influencer performance data</p>
+          <h1
+            className="text-2xl font-bold tracking-tight"
+            style={{ background: `linear-gradient(135deg, #fff 40%, ${PRIMARY})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+          >
+            Reports
+          </h1>
+          <p className="text-sm mt-1" style={{ color: DIM }}>Download your influencer performance data</p>
         </div>
         <div className="relative">
           <button
             onClick={() => setExportOpen(o => !o)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
-            style={{ background: PRIMARY, color: "hsl(222,47%,6%)" }}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
+            style={{ background: `linear-gradient(135deg, ${PRIMARY}, hsl(199,89%,36%))`, color: "hsl(222,47%,6%)", boxShadow: `0 4px 18px ${PRIMARY}45` }}
           >
             <Download className="w-4 h-4" />
             Export
@@ -713,18 +715,19 @@ function ReportsSection() {
           </button>
           {exportOpen && (
             <div
-              className="absolute right-0 top-full mt-2 w-44 rounded-xl overflow-hidden z-20 py-1"
-              style={{ background: CARD, border: `1px solid ${BORDER}`, boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }}
+              className="absolute right-0 top-full mt-2 w-48 rounded-xl overflow-hidden z-20 py-1"
+              style={{ background: "hsl(222,47%,10%)", border: `1px solid ${BORDER}`, boxShadow: "0 12px 40px rgba(0,0,0,0.6)" }}
             >
               {["Export as CSV", "Export as PDF", "Export as XLSX"].map(opt => (
                 <button
                   key={opt}
                   onClick={() => setExportOpen(false)}
-                  className="w-full text-left px-4 py-2.5 text-sm transition-colors"
+                  className="w-full text-left px-4 py-2.5 text-sm flex items-center gap-2.5 transition-colors"
                   style={{ color: DIM }}
                   onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.color = "white"; }}
                   onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = DIM; }}
                 >
+                  <FileText className="w-3.5 h-3.5 shrink-0" />
                   {opt}
                 </button>
               ))}
@@ -734,28 +737,21 @@ function ReportsSection() {
       </div>
 
       {/* ── Date Range filter ── */}
-      <div className="flex items-center gap-3 flex-wrap px-4 py-3 rounded-2xl" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
-        <Calendar className="w-4 h-4 shrink-0" style={{ color: DIM2 }} />
-        <span className="text-sm shrink-0" style={{ color: DIM }}>Date Range:</span>
-        <div className="flex items-center gap-2 flex-wrap flex-1">
-          <input
-            type="date"
-            defaultValue="2025-04-01"
-            className="text-sm px-3 py-1.5 rounded-lg outline-none"
-            style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${BORDER}`, color: "white" }}
-          />
-          <span style={{ color: DIM2 }}>—</span>
-          <input
-            type="date"
-            defaultValue="2025-04-30"
-            className="text-sm px-3 py-1.5 rounded-lg outline-none"
-            style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${BORDER}`, color: "white" }}
-          />
+      <div
+        className="flex items-center gap-3 flex-wrap px-5 py-3.5 rounded-2xl"
+        style={{ background: "linear-gradient(135deg, hsl(222,47%,10%), hsl(222,47%,8%))", border: `1px solid ${BORDER}`, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)" }}
+      >
+        <div className="flex items-center gap-2 shrink-0">
+          <Calendar className="w-4 h-4" style={{ color: PRIMARY }} />
+          <span className="text-sm font-medium" style={{ color: DIM }}>Date Range</span>
         </div>
-        <button
-          className="px-4 py-1.5 rounded-lg text-sm font-semibold transition-all hover:opacity-90 shrink-0"
-          style={{ background: PRIMARY, color: "hsl(222,47%,6%)" }}
-        >
+        <div className="w-px h-5" style={{ background: "rgba(255,255,255,0.08)" }} />
+        <div className="flex items-center gap-2 flex-1 flex-wrap">
+          <input type="date" defaultValue="2025-04-01" className="text-sm px-3 py-1.5 rounded-xl outline-none" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", color: "white" }} />
+          <span className="text-xs" style={{ color: DIM2 }}>to</span>
+          <input type="date" defaultValue="2025-04-30" className="text-sm px-3 py-1.5 rounded-xl outline-none" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", color: "white" }} />
+        </div>
+        <button className="px-5 py-1.5 rounded-xl text-sm font-semibold transition-all hover:opacity-90 shrink-0" style={{ background: PRIMARY, color: "hsl(222,47%,6%)", boxShadow: `0 2px 10px ${PRIMARY}40` }}>
           Apply
         </button>
       </div>
@@ -767,71 +763,93 @@ function ReportsSection() {
           return (
             <motion.div
               key={card.name}
-              initial={{ opacity: 0, y: 18 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, delay: i * 0.07 }}
-              className="rounded-2xl p-5 flex flex-col"
-              style={{ background: CARD, border: `1px solid ${BORDER}` }}
+              transition={{ duration: 0.4, delay: i * 0.08 }}
+              whileHover={{ y: -3, scale: 1.012 }}
+              className="rounded-2xl flex flex-col overflow-hidden cursor-default"
+              style={{ background: "linear-gradient(160deg, hsl(222,47%,11%) 0%, hsl(222,47%,8%) 100%)", border: `1px solid ${BORDER}`, boxShadow: "0 2px 20px rgba(0,0,0,0.25)" }}
             >
-              {/* Card header */}
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: card.iconBg }}>
-                  <CardIcon className="w-4 h-4" style={{ color: card.iconColor }} />
-                </div>
-                <div>
-                  <div className="text-[11px] font-medium leading-none mb-0.5" style={{ color: DIM2 }}>{card.type}</div>
-                  <div className="text-sm font-bold text-white leading-tight">{card.name}</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-1.5 text-xs mb-3" style={{ color: DIM2 }}>
-                <Calendar className="w-3 h-3" />
-                {card.period}
-              </div>
-              <div className="h-px mb-3" style={{ background: "rgba(255,255,255,0.06)" }} />
+              {/* Colored top accent strip */}
+              <div className="h-0.5 w-full shrink-0" style={{ background: `linear-gradient(90deg, ${card.accentColor}, transparent 70%)` }} />
 
-              {/* Rows — metrics */}
-              {card.kind === "metrics" && card.rows && (
-                <div className="space-y-2.5 flex-1">
-                  {card.rows.map(({ label, value, green }) => (
-                    <div key={label} className="flex items-center justify-between">
-                      <span className="text-xs" style={{ color: DIM2 }}>{label}</span>
-                      <span className="text-xs font-bold" style={{ color: green ? GREEN : "rgba(255,255,255,0.85)" }}>{value}</span>
+              <div className="p-5 flex flex-col flex-1">
+                {/* Card header */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                    style={{ background: `${card.accentColor}18`, border: `1px solid ${card.accentColor}28`, boxShadow: `0 0 16px ${card.accentColor}20` }}
+                  >
+                    <CardIcon className="w-5 h-5" style={{ color: card.accentColor }} />
+                  </div>
+                  <div>
+                    <div
+                      className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full inline-block mb-1"
+                      style={{ background: `${card.accentColor}15`, color: card.accentColor }}
+                    >
+                      {card.type}
                     </div>
-                  ))}
+                    <div className="text-sm font-bold text-white leading-tight">{card.name}</div>
+                  </div>
                 </div>
-              )}
 
-              {/* Rows — ranked list */}
-              {card.kind === "ranked" && card.ranked && (
-                <div className="space-y-2.5 flex-1">
-                  {card.ranked.map(({ rank, handle, sales }) => (
-                    <div key={handle} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
-                          style={{
-                            background: rank === 1 ? "rgba(234,179,8,0.15)" : "rgba(255,255,255,0.05)",
-                            color: rank === 1 ? "hsl(45,100%,60%)" : DIM2,
-                          }}
-                        >
-                          {rank}
-                        </div>
-                        <span className="text-xs" style={{ color: DIM }}>{handle}</span>
+                {/* Date badge */}
+                <div className="flex items-center gap-1.5 text-[11px] mb-4" style={{ color: DIM2 }}>
+                  <Calendar className="w-3 h-3" />
+                  {card.period}
+                </div>
+
+                {/* Highlight metric box */}
+                <div className="rounded-xl px-4 py-3 mb-4" style={{ background: `${card.accentColor}0d`, border: `1px solid ${card.accentColor}20` }}>
+                  <div className="text-[11px] font-medium mb-0.5" style={{ color: card.accentColor }}>{card.highlight.label}</div>
+                  <div className="text-2xl font-bold text-white tracking-tight">{card.highlight.value}</div>
+                </div>
+
+                {/* Rows — metrics */}
+                {card.kind === "metrics" && card.rows && (
+                  <div className="flex-1 space-y-0">
+                    {card.rows.map(({ label, value }) => (
+                      <div key={label} className="flex items-center justify-between py-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                        <span className="text-xs" style={{ color: DIM2 }}>{label}</span>
+                        <span className="text-sm font-bold" style={{ color: "rgba(255,255,255,0.8)" }}>{value}</span>
                       </div>
-                      <span className="text-xs font-bold" style={{ color: GREEN }}>{sales}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
 
-              <div className="h-px my-3" style={{ background: "rgba(255,255,255,0.06)" }} />
-              <button
-                className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-semibold transition-all hover:opacity-80"
-                style={{ background: "rgba(14,165,233,0.08)", color: PRIMARY, border: `1px solid rgba(14,165,233,0.18)` }}
-              >
-                <Download className="w-3.5 h-3.5" />
-                Download CSV
-              </button>
+                {/* Rows — ranked list */}
+                {card.kind === "ranked" && card.ranked && (
+                  <div className="flex-1 space-y-0">
+                    {card.ranked.map(({ rank, handle, sales }) => (
+                      <div key={handle} className="flex items-center justify-between py-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                        <div className="flex items-center gap-2.5">
+                          <div
+                            className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+                            style={{
+                              background: rank === 1 ? "rgba(234,179,8,0.2)" : rank === 2 ? "rgba(192,192,192,0.12)" : rank === 3 ? "rgba(205,127,50,0.15)" : "rgba(255,255,255,0.05)",
+                              color: rank === 1 ? "hsl(45,100%,60%)" : rank === 2 ? "#C0C0C0" : rank === 3 ? "#CD7F32" : DIM2,
+                              border: rank <= 3 ? "1px solid currentColor" : "none",
+                            }}
+                          >
+                            {rank}
+                          </div>
+                          <span className="text-xs" style={{ color: DIM }}>{handle}</span>
+                        </div>
+                        <span className="text-sm font-bold" style={{ color: GREEN }}>{sales}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Download button */}
+                <button
+                  className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold transition-all hover:opacity-90"
+                  style={{ background: `linear-gradient(135deg, ${card.accentColor}18, ${card.accentColor}08)`, color: card.accentColor, border: `1px solid ${card.accentColor}28` }}
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Download CSV
+                </button>
+              </div>
             </motion.div>
           );
         })}
@@ -839,46 +857,57 @@ function ReportsSection() {
 
       {/* ── Attribution Summary ── */}
       <motion.div
-        initial={{ opacity: 0, y: 18 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, delay: 0.32 }}
-        className="rounded-2xl p-5"
-        style={{ background: CARD, border: `1px solid ${BORDER}` }}
+        transition={{ duration: 0.4, delay: 0.36 }}
+        className="rounded-2xl overflow-hidden"
+        style={{ background: "linear-gradient(160deg, hsl(222,47%,11%) 0%, hsl(222,47%,8%) 100%)", border: `1px solid ${BORDER}`, boxShadow: "0 2px 20px rgba(0,0,0,0.25)" }}
       >
-        <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "rgba(14,165,233,0.12)" }}>
-              <FileText className="w-4 h-4" style={{ color: PRIMARY }} />
-            </div>
-            <div>
-              <div className="text-sm font-bold text-white">Attribution Summary</div>
-              <div className="text-xs" style={{ color: DIM2 }}>All Campaigns · Apr 1-30, 2025</div>
-            </div>
-          </div>
-          <button
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all hover:opacity-80"
-            style={{ background: "rgba(14,165,233,0.08)", color: PRIMARY, border: `1px solid rgba(14,165,233,0.18)` }}
-          >
-            <Download className="w-3 h-3" />
-            Download CSV
-          </button>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          {attrChannels.map(({ Icon, label, value, color }) => (
-            <div
-              key={label}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl"
-              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
-            >
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${color}20` }}>
-                <Icon className="w-3.5 h-3.5" style={{ color }} />
+        <div className="h-0.5 w-full" style={{ background: `linear-gradient(90deg, ${PRIMARY}, ${PURPLE}, transparent 70%)` }} />
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(14,165,233,0.12)", border: "1px solid rgba(14,165,233,0.25)", boxShadow: `0 0 16px ${PRIMARY}22` }}>
+                <FileText className="w-5 h-5" style={{ color: PRIMARY }} />
               </div>
               <div>
-                <div className="text-xs mb-0.5" style={{ color: DIM2 }}>{label}</div>
-                <div className="text-base font-bold text-white">{value}</div>
+                <div className="text-base font-bold text-white">Attribution Summary</div>
+                <div className="text-xs" style={{ color: DIM2 }}>All Campaigns · Apr 1–30, 2025</div>
               </div>
             </div>
-          ))}
+            <button
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all hover:opacity-80"
+              style={{ background: "rgba(14,165,233,0.1)", color: PRIMARY, border: `1px solid rgba(14,165,233,0.22)` }}
+            >
+              <Download className="w-3.5 h-3.5" />
+              Download CSV
+            </button>
+          </div>
+
+          {/* Animated horizontal bars */}
+          <div className="space-y-4">
+            {attrChannels.map(({ Icon, label, value, pct, color }, ai) => (
+              <div key={label} className="flex items-center gap-4">
+                <div className="flex items-center gap-2 shrink-0" style={{ width: 108 }}>
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${color}18`, border: `1px solid ${color}22` }}>
+                    <Icon className="w-3.5 h-3.5" style={{ color }} />
+                  </div>
+                  <span className="text-xs font-medium" style={{ color: DIM }}>{label}</span>
+                </div>
+                <div className="flex-1 h-7 rounded-xl overflow-hidden relative" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.05)" }}>
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${pct}%` }}
+                    transition={{ duration: 0.9, delay: 0.5 + ai * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                    className="absolute inset-y-0 left-0 rounded-xl flex items-center justify-end pr-3"
+                    style={{ background: `linear-gradient(90deg, ${color}55, ${color}dd)`, minWidth: 52 }}
+                  >
+                    <span className="text-xs font-bold text-white">{value}</span>
+                  </motion.div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </motion.div>
 
