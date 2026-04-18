@@ -66,7 +66,221 @@ const navItems = [
   { icon: Code2,           label: "Pixels"      },
 ];
 
+/* ─── Campaign mock data ─── */
+const campaigns = [
+  {
+    name: "Summer Sale",
+    emoji: "📢",
+    status: "Active",
+    budget: 50000,
+    spent: 48000,
+    sales: 250000,
+    roas: 5.2,
+    influencers: 5,
+    created: "Apr 1, 2025",
+  },
+  {
+    name: "Winter Collection",
+    emoji: "❄️",
+    status: "Active",
+    budget: 30000,
+    spent: 28000,
+    sales: 180000,
+    roas: 6.0,
+    influencers: 3,
+    created: "Apr 5, 2025",
+  },
+  {
+    name: "Festival Offer",
+    emoji: "🎉",
+    status: "Draft",
+    budget: 40000,
+    spent: 0,
+    sales: 0,
+    roas: 0.0,
+    influencers: 0,
+    created: "Apr 10, 2025",
+  },
+];
+
 const timePeriods = ["4W", "8W", "3M", "1Y"];
+
+/* ─── Campaigns Section component ─── */
+function CampaignsSection() {
+  const [campaignFilter, setCampaignFilter] = useState("All");
+
+  const filterTabs = [
+    { label: "All Campaigns", key: "All",    count: campaigns.length },
+    { label: "Active",        key: "Active", count: campaigns.filter(c => c.status === "Active").length },
+    { label: "Draft",         key: "Draft",  count: campaigns.filter(c => c.status === "Draft").length },
+  ];
+
+  const filtered = campaignFilter === "All"
+    ? campaigns
+    : campaigns.filter(c => c.status === campaignFilter);
+
+  return (
+    <motion.div
+      key="campaigns"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+      className="space-y-4"
+    >
+      {/* Title row */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-xl font-bold text-white">Campaigns</h1>
+          <p className="text-sm mt-0.5" style={{ color: DIM }}>Manage your influencer campaigns</p>
+        </div>
+        <button
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
+          style={{ background: PRIMARY, color: "hsl(222,47%,6%)" }}
+        >
+          + New Campaign
+        </button>
+      </div>
+
+      {/* Filter tabs */}
+      <div className="flex items-center gap-1 p-1 rounded-xl w-fit" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+        {filterTabs.map(tab => {
+          const isActive = campaignFilter === tab.key;
+          return (
+            <button
+              key={tab.key}
+              onClick={() => setCampaignFilter(tab.key)}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all"
+              style={{
+                background: isActive ? PRIMARY : "transparent",
+                color: isActive ? "hsl(222,47%,6%)" : DIM,
+              }}
+            >
+              {tab.label}
+              <span
+                className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                style={{
+                  background: isActive ? "rgba(0,0,0,0.18)" : "rgba(255,255,255,0.07)",
+                  color: isActive ? "hsl(222,47%,6%)" : DIM2,
+                }}
+              >
+                {tab.count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Campaign cards */}
+      <div className="space-y-3">
+        {filtered.map((c, i) => {
+          const budgetPct = c.budget > 0 ? Math.round((c.spent / c.budget) * 100) : 0;
+          const isActive = c.status === "Active";
+          const barColor = budgetPct >= 90 ? "hsl(22,100%,57%)" : PRIMARY;
+
+          return (
+            <motion.div
+              key={c.name}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, delay: i * 0.07 }}
+              className="rounded-2xl p-5"
+              style={{ background: CARD, border: `1px solid ${BORDER}` }}
+            >
+              {/* Card header */}
+              <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0"
+                    style={{
+                      background: isActive ? "rgba(14,165,233,0.1)" : "rgba(255,255,255,0.05)",
+                      border: `1px solid ${isActive ? "rgba(14,165,233,0.22)" : "rgba(255,255,255,0.08)"}`,
+                    }}
+                  >
+                    {c.emoji}
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold text-white">{c.name}</div>
+                    <div className="text-xs mt-0.5" style={{ color: DIM2 }}>Created: {c.created}</div>
+                  </div>
+                </div>
+                <span
+                  className="text-[11px] font-semibold px-2.5 py-1 rounded-full shrink-0"
+                  style={
+                    isActive
+                      ? { background: "rgba(34,197,94,0.12)", color: GREEN, border: "1px solid rgba(34,197,94,0.25)" }
+                      : { background: "rgba(255,255,255,0.06)", color: DIM, border: "1px solid rgba(255,255,255,0.1)" }
+                  }
+                >
+                  {c.status}
+                </span>
+              </div>
+
+              {/* Metrics grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                {[
+                  { label: "Budget", value: `₹${c.budget.toLocaleString("en-IN")}` },
+                  { label: "Spent",  value: `₹${c.spent.toLocaleString("en-IN")}` },
+                  { label: "Sales",  value: `₹${c.sales.toLocaleString("en-IN")}` },
+                  { label: "ROAS",   value: `${c.roas.toFixed(1)}×` },
+                ].map(m => (
+                  <div key={m.label} className="rounded-xl px-3 py-2.5" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                    <div className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: DIM2 }}>{m.label}</div>
+                    <div className="text-sm font-bold text-white">{m.value}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Influencers count */}
+              <div className="flex items-center gap-2 mb-3">
+                <Users className="w-3.5 h-3.5 shrink-0" style={{ color: DIM2 }} />
+                <span className="text-xs" style={{ color: DIM }}>
+                  <span className="font-semibold text-white">{c.influencers}</span> Influencer{c.influencers !== 1 ? "s" : ""}
+                </span>
+              </div>
+
+              {/* Progress bar */}
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[11px]" style={{ color: DIM2 }}>Budget Used</span>
+                  <span className="text-[11px] font-bold" style={{ color: budgetPct >= 90 ? barColor : DIM }}>{budgetPct}%</span>
+                </div>
+                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${budgetPct}%` }}
+                    transition={{ duration: 0.8, delay: 0.2 + i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                    className="h-full rounded-full"
+                    style={{ background: budgetPct > 0 ? `linear-gradient(90deg, ${PRIMARY}, ${barColor})` : "transparent" }}
+                  />
+                </div>
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <button
+                  className="px-4 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                  style={{ background: "rgba(14,165,233,0.1)", color: PRIMARY, border: "1px solid rgba(14,165,233,0.22)" }}
+                  onMouseEnter={e => { e.currentTarget.style.background = PRIMARY; e.currentTarget.style.color = "hsl(222,47%,6%)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "rgba(14,165,233,0.1)"; e.currentTarget.style.color = PRIMARY; }}
+                >
+                  {isActive ? "View Details" : "Edit Draft"}
+                </button>
+                <button
+                  className="px-4 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                  style={{ background: "rgba(239,68,68,0.08)", color: "hsl(0,84%,70%)", border: "1px solid rgba(239,68,68,0.2)" }}
+                  onMouseEnter={e => { e.currentTarget.style.background = "rgba(239,68,68,0.18)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "rgba(239,68,68,0.08)"; }}
+                >
+                  Delete
+                </button>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+    </motion.div>
+  );
+}
 
 function fmt(n: number) {
   if (n >= 10000000) return `₹${(n / 10000000).toFixed(1)}Cr`;
@@ -122,9 +336,7 @@ function StatCard({ label, value, sub, subColor, icon: Icon, accent }: {
 export default function MainDashboard() {
   const [, setLocation] = useLocation();
   const [activeNav, setActiveNav] = useState("Dashboard");
-  /* Improvement 9: active time period state */
   const [activePeriod, setActivePeriod] = useState("8W");
-  /* Improvement 10: mobile sidebar toggle */
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const SidebarContent = () => (
@@ -266,6 +478,12 @@ export default function MainDashboard() {
 
         {/* ── SCROLLABLE CONTENT ── */}
         <main className="flex-1 overflow-y-auto px-4 md:px-6 py-5 space-y-4">
+
+          {/* ══ CAMPAIGNS VIEW ══ */}
+          {activeNav === "Campaigns" && <CampaignsSection />}
+
+          {/* ══ DASHBOARD VIEW ══ */}
+          {activeNav !== "Campaigns" && <div className="space-y-4">
 
           {/* Page title — Improvement 7: calendar icon */}
           <div className="flex items-center justify-between flex-wrap gap-3">
@@ -505,6 +723,7 @@ export default function MainDashboard() {
           </motion.div>
 
           <div className="h-4" />
+          </div>}
         </main>
       </div>
     </div>
