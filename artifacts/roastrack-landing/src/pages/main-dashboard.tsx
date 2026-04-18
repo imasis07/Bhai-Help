@@ -5,6 +5,7 @@ import {
   LayoutDashboard, Target, Users, BarChart2, Code2, Settings,
   Search, Bell, ShoppingCart, Megaphone, CheckCircle2, TrendingUp,
   ArrowUpRight, ChevronRight, Star, Zap, Calendar, Menu, X,
+  Eye, Link2, MessageCircle, Mail,
 } from "lucide-react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -104,6 +105,14 @@ const campaigns = [
 ];
 
 const timePeriods = ["4W", "8W", "3M", "1Y"];
+
+/* ─── Influencer extended mock data ─── */
+const influencerExtData = [
+  { handle: "@ayesha_lifestyle", niche: "Fashion", followers: "250K", campaign: "Summer Sale",      views: 45000, linkClick: 1200, google: 890, whatsapp: 45, dm: 89, sales: 1240000, roas: 8.4, avatar: "AL", c1: "hsl(338,82%,52%)", c2: "hsl(22,100%,57%)"   },
+  { handle: "@techwithrahul",    niche: "Tech",    followers: "180K", campaign: "Summer Sale",      views: 32000, linkClick: 800,  google: 620, whatsapp: 23, dm: 45, sales: 820000,  roas: 5.2, avatar: "TR", c1: "hsl(199,89%,48%)", c2: "hsl(270,60%,68%)"  },
+  { handle: "@priya_beauty",     niche: "Beauty",  followers: "120K", campaign: "Winter Collection", views: 28000, linkClick: 600,  google: 450, whatsapp: 18, dm: 32, sales: 650000,  roas: 4.8, avatar: "PB", c1: "hsl(270,60%,68%)", c2: "hsl(338,82%,52%)"  },
+  { handle: "@delhifoodie",      niche: "Food",    followers: "95K",  campaign: "Festival Offer",   views: 18000, linkClick: 350,  google: 280, whatsapp: 12, dm: 18, sales: 420000,  roas: 3.2, avatar: "DF", c1: "hsl(142,71%,45%)", c2: "hsl(199,89%,48%)"  },
+];
 
 /* ─── Campaigns Section component ─── */
 function CampaignsSection() {
@@ -332,6 +341,268 @@ function StatCard({ label, value, sub, subColor, icon: Icon, accent }: {
   );
 }
 
+/* ─── Influencers Section component ─── */
+function InfluencersSection() {
+  const [search, setSearch]             = useState("");
+  const [campaignFilter, setCampaignFilter] = useState("All Campaigns");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [page, setPage]                 = useState(1);
+
+  const TOTAL    = 12;
+  const PER_PAGE = 4;
+  const totalPages = Math.ceil(TOTAL / PER_PAGE);
+
+  function fmtK(n: number) {
+    if (n >= 10000) return `${Math.round(n / 1000)}K`;
+    if (n >= 1000)  return `${(n / 1000).toFixed(1)}K`;
+    return String(n);
+  }
+
+  const campaignOptions = ["All Campaigns", "Summer Sale", "Winter Collection", "Festival Offer"];
+
+  const filtered = influencerExtData.filter(inf => {
+    const q = search.toLowerCase();
+    const matchSearch   = !search || inf.handle.toLowerCase().includes(q);
+    const matchCampaign = campaignFilter === "All Campaigns" || inf.campaign === campaignFilter;
+    return matchSearch && matchCampaign;
+  });
+
+  const roasColor = (r: number) =>
+    r >= 7 ? GREEN : r >= 5 ? PRIMARY : r >= 3.5 ? "hsl(45,100%,60%)" : DIM;
+
+  return (
+    <motion.div
+      key="influencers"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+      className="space-y-4"
+    >
+      {/* ─ Title row ─ */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-xl font-bold text-white">Influencers</h1>
+          <p className="text-sm mt-0.5" style={{ color: DIM }}>Manage your influencer partnerships</p>
+        </div>
+        <button
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
+          style={{ background: PRIMARY, color: "hsl(222,47%,6%)" }}
+        >
+          <Users className="w-4 h-4" />
+          + Add Influencer
+        </button>
+      </div>
+
+      {/* ─ Search + Filter row ─ */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-2 flex-1 min-w-[200px] px-3.5 py-2.5 rounded-xl" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+          <Search className="w-4 h-4 shrink-0" style={{ color: DIM2 }} />
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search by name or handle..."
+            className="bg-transparent text-sm outline-none flex-1 text-white"
+            style={{ caretColor: PRIMARY }}
+          />
+          {search && (
+            <button onClick={() => setSearch("")} style={{ color: DIM2 }}>
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+
+        {/* Campaign dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => setDropdownOpen(o => !o)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all"
+            style={{ background: CARD, border: `1px solid ${dropdownOpen ? PRIMARY : BORDER}`, color: dropdownOpen ? PRIMARY : DIM }}
+          >
+            {campaignFilter}
+            <ChevronRight
+              className="w-3.5 h-3.5 transition-transform duration-200"
+              style={{ transform: dropdownOpen ? "rotate(270deg)" : "rotate(90deg)" }}
+            />
+          </button>
+          {dropdownOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -6, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.15 }}
+              className="absolute top-full right-0 mt-1.5 z-20 min-w-[190px] rounded-xl overflow-hidden py-1"
+              style={{ background: "hsl(222,47%,10%)", border: `1px solid ${BORDER}`, boxShadow: "0 16px 40px rgba(0,0,0,0.55)" }}
+            >
+              {campaignOptions.map(opt => (
+                <button
+                  key={opt}
+                  onClick={() => { setCampaignFilter(opt); setDropdownOpen(false); }}
+                  className="w-full px-4 py-2.5 text-sm text-left flex items-center gap-2 transition-all"
+                  style={{ color: campaignFilter === opt ? PRIMARY : DIM, background: "transparent" }}
+                  onMouseEnter={e => { e.currentTarget.style.background = "rgba(14,165,233,0.07)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
+                >
+                  {campaignFilter === opt && <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: PRIMARY }} />}
+                  {campaignFilter !== opt && <div className="w-1.5 h-1.5" />}
+                  {opt}
+                </button>
+              ))}
+            </motion.div>
+          )}
+        </div>
+      </div>
+
+      {/* ─ Cards grid ─ */}
+      {filtered.length === 0 ? (
+        <div className="text-center py-16 rounded-2xl" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+          <Users className="w-10 h-10 mx-auto mb-3" style={{ color: DIM2 }} />
+          <p className="text-sm font-medium text-white">No influencers found</p>
+          <p className="text-xs mt-1" style={{ color: DIM2 }}>Try changing your search or filter</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {filtered.map((inf, i) => {
+            const metricRows = [
+              { label: "Views",      Icon: Eye,           value: fmtK(inf.views),     color: PRIMARY         },
+              { label: "Link Click", Icon: Link2,         value: fmtK(inf.linkClick), color: "#3B82F6"       },
+              { label: "Google",     Icon: Search,        value: fmtK(inf.google),    color: "#8B5CF6"       },
+              { label: "WhatsApp",   Icon: MessageCircle, value: fmtK(inf.whatsapp),  color: GREEN           },
+              { label: "DM",         Icon: Mail,          value: fmtK(inf.dm),        color: "#F97316"       },
+              { label: "Sales",      Icon: ShoppingCart,  value: fmt(inf.sales),      color: GREEN           },
+            ];
+            const rc = roasColor(inf.roas);
+
+            return (
+              <motion.div
+                key={inf.handle}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, delay: i * 0.07 }}
+                className="rounded-2xl p-5 flex flex-col gap-4"
+                style={{ background: CARD, border: `1px solid ${BORDER}` }}
+                onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = `0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(14,165,233,0.18)`; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = "none"; }}
+              >
+                {/* Header: avatar + info + ROAS */}
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-12 h-12 rounded-full shrink-0 flex items-center justify-center text-sm font-bold ring-2 ring-offset-2"
+                    style={{ background: `linear-gradient(135deg, ${inf.c1}, ${inf.c2})`, color: "white", ringColor: inf.c1, ringOffsetColor: CARD }}
+                  >
+                    {inf.avatar}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-bold text-white truncate">{inf.handle}</div>
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold" style={{ background: `${inf.c1}20`, color: inf.c1 }}>
+                        {inf.niche}
+                      </span>
+                      <span className="text-[11px]" style={{ color: DIM2 }}>{inf.followers} followers</span>
+                    </div>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider mb-0.5" style={{ color: DIM2 }}>ROAS</div>
+                    <div className="text-xl font-bold" style={{ color: rc, textShadow: `0 0 12px ${rc}66` }}>{inf.roas}×</div>
+                  </div>
+                </div>
+
+                {/* Campaign tag */}
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <Target className="w-3.5 h-3.5 shrink-0" style={{ color: DIM2 }} />
+                  <span className="text-xs flex-1 truncate" style={{ color: DIM }}>{inf.campaign}</span>
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0" style={{ background: "rgba(34,197,94,0.12)", color: GREEN, border: "1px solid rgba(34,197,94,0.2)" }}>
+                    Active
+                  </span>
+                </div>
+
+                {/* Metrics box */}
+                <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.07)" }}>
+                  {metricRows.map(({ label, Icon, value, color }, mi) => (
+                    <div
+                      key={label}
+                      className="flex items-center justify-between px-3.5 py-2.5"
+                      style={{
+                        background: mi % 2 === 0 ? "rgba(255,255,255,0.025)" : "transparent",
+                        borderBottom: mi < metricRows.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none",
+                      }}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Icon className="w-3.5 h-3.5 shrink-0" style={{ color }} />
+                        <span className="text-xs" style={{ color: DIM2 }}>{label}</span>
+                      </div>
+                      <span className="text-xs font-bold" style={{ color: mi === 5 ? GREEN : "rgba(255,255,255,0.85)" }}>
+                        {value}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Action buttons */}
+                <div className="flex items-center gap-2">
+                  <button
+                    className="flex-1 py-2 rounded-xl text-xs font-semibold transition-all"
+                    style={{ background: "rgba(14,165,233,0.1)", color: PRIMARY, border: "1px solid rgba(14,165,233,0.22)" }}
+                    onMouseEnter={e => { e.currentTarget.style.background = PRIMARY; e.currentTarget.style.color = "hsl(222,47%,6%)"; e.currentTarget.style.border = `1px solid ${PRIMARY}`; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = "rgba(14,165,233,0.1)"; e.currentTarget.style.color = PRIMARY; e.currentTarget.style.border = "1px solid rgba(14,165,233,0.22)"; }}
+                  >
+                    View Details
+                  </button>
+                  <button
+                    className="px-4 py-2 rounded-xl text-xs font-semibold transition-all"
+                    style={{ background: "rgba(239,68,68,0.08)", color: "hsl(0,84%,70%)", border: "1px solid rgba(239,68,68,0.2)" }}
+                    onMouseEnter={e => { e.currentTarget.style.background = "rgba(239,68,68,0.18)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = "rgba(239,68,68,0.08)"; }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ─ Pagination ─ */}
+      <div className="flex items-center justify-between flex-wrap gap-3 px-1">
+        <span className="text-xs" style={{ color: DIM2 }}>
+          Showing {(page - 1) * PER_PAGE + 1}–{Math.min(page * PER_PAGE, TOTAL)} of {TOTAL} influencers
+        </span>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold transition-all"
+            style={{ background: CARD, border: `1px solid ${BORDER}`, color: DIM, opacity: page === 1 ? 0.35 : 1 }}
+          >
+            ←
+          </button>
+          {Array.from({ length: totalPages }, (_, idx) => idx + 1).map(p => (
+            <button
+              key={p}
+              onClick={() => setPage(p)}
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold transition-all"
+              style={{
+                background: page === p ? PRIMARY : CARD,
+                border: `1px solid ${page === p ? PRIMARY : BORDER}`,
+                color: page === p ? "hsl(222,47%,6%)" : DIM,
+              }}
+            >
+              {p}
+            </button>
+          ))}
+          <button
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold transition-all"
+            style={{ background: CARD, border: `1px solid ${BORDER}`, color: DIM, opacity: page === totalPages ? 0.35 : 1 }}
+          >
+            →
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 /* ─── Main ─── */
 export default function MainDashboard() {
   const [, setLocation] = useLocation();
@@ -482,8 +753,11 @@ export default function MainDashboard() {
           {/* ══ CAMPAIGNS VIEW ══ */}
           {activeNav === "Campaigns" && <CampaignsSection />}
 
+          {/* ══ INFLUENCERS VIEW ══ */}
+          {activeNav === "Influencers" && <InfluencersSection />}
+
           {/* ══ DASHBOARD VIEW ══ */}
-          {activeNav !== "Campaigns" && <div className="space-y-4">
+          {activeNav !== "Campaigns" && activeNav !== "Influencers" && <div className="space-y-4">
 
           {/* Page title — Improvement 7: calendar icon */}
           <div className="flex items-center justify-between flex-wrap gap-3">
