@@ -4,10 +4,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Target, Users, BarChart2, Code2, Settings,
   Search, Bell, ShoppingCart, Megaphone, CheckCircle2, TrendingUp,
-  ArrowUpRight, ChevronRight, Star, Zap, Calendar, Menu, X,
+  ArrowUpRight, ChevronRight, ChevronLeft, Star, Zap, Calendar, Menu, X,
   Eye, Link2, MessageCircle, Mail, Download, ChevronDown, FileText,
   EyeOff, Copy, Plus, Pencil, Trash2, FlaskConical,
   UserCircle2, Palette, Lock, ShieldCheck, Monitor, SunMoon,
+  ExternalLink, Film, Globe, Hash,
 } from "lucide-react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -124,6 +125,307 @@ const metricMaxValues = {
   dm:        Math.max(...influencerExtData.map(d => d.dm)),
   sales:     Math.max(...influencerExtData.map(d => d.sales)),
 };
+
+/* ─── Per-influencer product data ─── */
+const influencerProducts: Record<string, Array<{
+  name: string; views: number; linkClick: number; google: number;
+  whatsapp: number; dm: number; sales: number; roas: number;
+  link: string; reelTitle: string; reelDate: string; reelSales: number;
+}>> = {
+  "@ayesha_lifestyle": [
+    { name: "Mamaearth Shampoo",     views: 28000, linkClick: 800, google: 600, whatsapp: 30, dm: 45, sales: 1250000, roas: 8.3, link: "https://roastrack.in/link_abc123", reelTitle: "Summer Sale – Shampoo Reel",     reelDate: "Apr 1, 2025",  reelSales: 25 },
+    { name: "Mamaearth Conditioner", views: 17000, linkClick: 400, google: 290, whatsapp: 15, dm: 44, sales: 680000,  roas: 6.8, link: "https://roastrack.in/link_def456", reelTitle: "Summer Sale – Conditioner Reel", reelDate: "Apr 5, 2025",  reelSales: 17 },
+  ],
+  "@techwithrahul": [
+    { name: "boAt Earbuds Pro",   views: 20000, linkClick: 550, google: 410, whatsapp: 18, dm: 30, sales: 520000, roas: 5.8, link: "https://roastrack.in/link_gh7890", reelTitle: "Tech Review – boAt Earbuds",   reelDate: "Apr 3, 2025",  reelSales: 19 },
+    { name: "boAt Smartwatch X2", views: 12000, linkClick: 250, google: 210, whatsapp: 5,  dm: 15, sales: 300000, roas: 4.1, link: "https://roastrack.in/link_ij1122", reelTitle: "Smartwatch Unboxing & Review", reelDate: "Apr 8, 2025",  reelSales: 11 },
+  ],
+  "@priya_beauty": [
+    { name: "Dot & Key Serum",      views: 18000, linkClick: 380, google: 290, whatsapp: 10, dm: 20, sales: 390000, roas: 5.1, link: "https://roastrack.in/link_kl3344", reelTitle: "Skincare Routine ft. Dot & Key", reelDate: "Apr 6, 2025",  reelSales: 14 },
+    { name: "Lakme CC Cream",       views: 10000, linkClick: 220, google: 160, whatsapp: 8,  dm: 12, sales: 260000, roas: 4.3, link: "https://roastrack.in/link_mn5566", reelTitle: "GRWM – Lakme CC Cream Look",     reelDate: "Apr 11, 2025", reelSales: 10 },
+  ],
+  "@delhifoodie": [
+    { name: "Wow Life Protein Bar",  views: 11000, linkClick: 200, google: 160, whatsapp: 7,  dm: 10, sales: 250000, roas: 3.6, link: "https://roastrack.in/link_op7788", reelTitle: "Honest Review – Protein Bar",   reelDate: "Apr 9, 2025",  reelSales: 8 },
+    { name: "Slurrp Farm Muesli",    views: 7000,  linkClick: 150, google: 120, whatsapp: 5,  dm: 8,  sales: 170000, roas: 2.8, link: "https://roastrack.in/link_qr9900", reelTitle: "Healthy Breakfast Haul",        reelDate: "Apr 14, 2025", reelSales: 6 },
+  ],
+};
+
+/* ─── Influencer Detail View ─── */
+function InfluencerDetailView({ inf, onBack }: { inf: typeof influencerExtData[0]; onBack: () => void }) {
+  const products = influencerProducts[inf.handle] ?? [];
+
+  function fmtK(n: number) {
+    if (n >= 10000) return `${Math.round(n / 1000)}K`;
+    if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
+    return String(n);
+  }
+
+  const roasColor = (r: number) =>
+    r >= 7 ? GREEN : r >= 5 ? PRIMARY : r >= 3.5 ? "hsl(45,100%,60%)" : DIM;
+
+  const totalViews     = products.reduce((s, p) => s + p.views, 0);
+  const totalSales     = products.reduce((s, p) => s + p.sales, 0);
+  const avgRoas        = products.length ? products.reduce((s, p) => s + p.roas, 0) / products.length : 0;
+
+  const channelCols = [
+    { label: "Link Click", Icon: Link2,         key: "linkClick" as const, color: "#3B82F6" },
+    { label: "Google",     Icon: Search,         key: "google"    as const, color: "#8B5CF6" },
+    { label: "WhatsApp",   Icon: MessageCircle,  key: "whatsapp"  as const, color: GREEN     },
+    { label: "DM",         Icon: Mail,           key: "dm"        as const, color: "#F97316" },
+  ];
+
+  return (
+    <motion.div
+      key="detail"
+      initial={{ opacity: 0, x: 24 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -24 }}
+      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+      className="space-y-5"
+    >
+      {/* ── Back + breadcrumb ── */}
+      <button
+        onClick={onBack}
+        className="flex items-center gap-2 text-sm font-medium transition-all group"
+        style={{ color: DIM }}
+        onMouseEnter={e => { e.currentTarget.style.color = "white"; }}
+        onMouseLeave={e => { e.currentTarget.style.color = DIM; }}
+      >
+        <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+        Influencers
+        <span style={{ color: DIM2 }}>/</span>
+        <span className="text-white">{inf.handle}</span>
+      </button>
+
+      {/* ── Hero card ── */}
+      <div
+        className="rounded-2xl p-6 relative overflow-hidden"
+        style={{ background: CARD, border: `1px solid ${BORDER}` }}
+      >
+        {/* Glow blob */}
+        <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full blur-3xl pointer-events-none" style={{ background: `${inf.c1}22` }} />
+
+        <div className="flex flex-wrap items-start gap-5 relative">
+          {/* Avatar */}
+          <div
+            className="w-20 h-20 rounded-2xl flex items-center justify-center text-2xl font-bold shrink-0"
+            style={{ background: `linear-gradient(135deg, ${inf.c1}, ${inf.c2})`, color: "white", boxShadow: `0 0 28px ${inf.c1}55` }}
+          >
+            {inf.avatar}
+          </div>
+
+          {/* Info */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3 flex-wrap">
+              <h1 className="text-xl font-bold text-white">{inf.handle}</h1>
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ background: `${inf.c1}22`, color: inf.c1 }}>
+                {inf.niche}
+              </span>
+            </div>
+            <p className="text-sm mt-1" style={{ color: DIM }}>Fashion Creator · {inf.followers} followers</p>
+            <p className="text-xs mt-1" style={{ color: DIM2 }}>Campaign: <span className="text-white font-medium">{inf.campaign}</span></p>
+          </div>
+
+          {/* Headline stats */}
+          <div className="flex gap-4 flex-wrap">
+            {[
+              { label: "Avg ROAS",   value: `${avgRoas.toFixed(1)}×`, color: roasColor(avgRoas) },
+              { label: "Total Sales", value: fmt(totalSales),         color: GREEN              },
+              { label: "Total Views", value: fmtK(totalViews),        color: PRIMARY            },
+            ].map(s => (
+              <div key={s.label} className="text-center px-4 py-3 rounded-xl" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                <div className="text-lg font-bold" style={{ color: s.color }}>{s.value}</div>
+                <div className="text-[11px] mt-0.5" style={{ color: DIM2 }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Instagram live stats bar */}
+        <div className="mt-5 flex flex-wrap gap-3">
+          {[
+            { Icon: Globe,   label: "Platform",  value: "Instagram"            },
+            { Icon: Users,   label: "Followers",  value: inf.followers          },
+            { Icon: Hash,    label: "Posts",      value: "456"                  },
+            { Icon: TrendingUp, label: "Following", value: "1.2K"              },
+          ].map(s => (
+            <div key={s.label} className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs" style={{ background: "rgba(14,165,233,0.07)", border: "1px solid rgba(14,165,233,0.15)" }}>
+              <s.Icon className="w-3.5 h-3.5 shrink-0" style={{ color: PRIMARY }} />
+              <span style={{ color: DIM2 }}>{s.label}:</span>
+              <span className="font-semibold text-white">{s.value}</span>
+            </div>
+          ))}
+          <div className="flex items-center gap-1.5 ml-auto">
+            <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: GREEN }} />
+            <span className="text-xs font-medium" style={{ color: GREEN }}>Live Data</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Product-wise Performance Table ── */}
+      <div className="rounded-2xl overflow-hidden" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+        <div className="flex items-center gap-3 px-5 py-4 border-b" style={{ borderColor: BORDER }}>
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(139,92,246,0.15)", border: "1px solid rgba(139,92,246,0.25)" }}>
+            <BarChart2 className="w-3.5 h-3.5" style={{ color: PURPLE }} />
+          </div>
+          <div>
+            <h2 className="text-sm font-bold text-white">Product-wise Performance</h2>
+            <p className="text-[11px]" style={{ color: DIM2 }}>Attributed revenue per product</p>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
+                {["Product", "Views", "Link Click", "Google", "WhatsApp", "DM", "Sales", "ROAS"].map(h => (
+                  <th key={h} className="px-4 py-3 text-left font-semibold whitespace-nowrap" style={{ color: DIM2 }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {products.map((p, i) => (
+                <tr
+                  key={p.name}
+                  style={{ borderBottom: i < products.length - 1 ? `1px solid rgba(255,255,255,0.04)` : "none", background: i % 2 === 0 ? "rgba(255,255,255,0.015)" : "transparent" }}
+                >
+                  <td className="px-4 py-3.5 font-medium text-white whitespace-nowrap">{p.name}</td>
+                  <td className="px-4 py-3.5 whitespace-nowrap" style={{ color: PRIMARY }}>{fmtK(p.views)}</td>
+                  <td className="px-4 py-3.5 whitespace-nowrap" style={{ color: "#3B82F6" }}>{fmtK(p.linkClick)}</td>
+                  <td className="px-4 py-3.5 whitespace-nowrap" style={{ color: "#8B5CF6" }}>{fmtK(p.google)}</td>
+                  <td className="px-4 py-3.5 whitespace-nowrap" style={{ color: GREEN }}>{p.whatsapp}</td>
+                  <td className="px-4 py-3.5 whitespace-nowrap" style={{ color: "#F97316" }}>{p.dm}</td>
+                  <td className="px-4 py-3.5 font-bold whitespace-nowrap" style={{ color: GREEN }}>{fmt(p.sales)}</td>
+                  <td className="px-4 py-3.5 whitespace-nowrap">
+                    <span className="font-bold" style={{ color: roasColor(p.roas) }}>{p.roas}×</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* ── Link-wise Breakdown ── */}
+      <div className="rounded-2xl" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+        <div className="flex items-center gap-3 px-5 py-4 border-b" style={{ borderColor: BORDER }}>
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(14,165,233,0.12)", border: "1px solid rgba(14,165,233,0.25)" }}>
+            <Link2 className="w-3.5 h-3.5" style={{ color: PRIMARY }} />
+          </div>
+          <div>
+            <h2 className="text-sm font-bold text-white">Link-wise Breakdown</h2>
+            <p className="text-[11px]" style={{ color: DIM2 }}>Attribution channels per tracking link</p>
+          </div>
+        </div>
+
+        <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+          {products.map((p, i) => (
+            <div key={p.name} className="px-5 py-5">
+              <div className="flex items-center gap-2 mb-3">
+                <ShoppingCart className="w-3.5 h-3.5 shrink-0" style={{ color: DIM2 }} />
+                <span className="text-sm font-semibold text-white">{p.name}</span>
+              </div>
+
+              <div
+                className="flex items-center gap-2 px-3.5 py-2 rounded-xl mb-4 cursor-pointer group"
+                style={{ background: "rgba(14,165,233,0.06)", border: "1px solid rgba(14,165,233,0.15)" }}
+              >
+                <Link2 className="w-3 h-3 shrink-0" style={{ color: PRIMARY }} />
+                <span className="text-[11px] font-mono truncate flex-1" style={{ color: DIM }}>{p.link}</span>
+                <Copy className="w-3 h-3 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: PRIMARY }} />
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {channelCols.map(col => (
+                  <div
+                    key={col.key}
+                    className="rounded-xl px-4 py-3 flex flex-col gap-2"
+                    style={{ background: `${col.color}0d`, border: `1px solid ${col.color}25` }}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <col.Icon className="w-3.5 h-3.5" style={{ color: col.color }} />
+                      <span className="text-[11px] font-medium" style={{ color: col.color }}>{col.label}</span>
+                    </div>
+                    <span className="text-lg font-bold text-white">{fmtK(p[col.key])}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Recent Reels ── */}
+      <div className="rounded-2xl" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+        <div className="flex items-center gap-3 px-5 py-4 border-b" style={{ borderColor: BORDER }}>
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(249,115,22,0.12)", border: "1px solid rgba(249,115,22,0.25)" }}>
+            <Film className="w-3.5 h-3.5" style={{ color: "#F97316" }} />
+          </div>
+          <div>
+            <h2 className="text-sm font-bold text-white">Recent Reels</h2>
+            <p className="text-[11px]" style={{ color: DIM2 }}>Product-attributed content performance</p>
+          </div>
+        </div>
+
+        <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+          {products.map((p, i) => (
+            <motion.div
+              key={p.reelTitle}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: i * 0.08 }}
+              className="px-5 py-5 flex flex-wrap gap-5 items-center"
+            >
+              {/* Reel thumbnail placeholder */}
+              <div
+                className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0 relative overflow-hidden"
+                style={{ background: `linear-gradient(135deg, ${inf.c1}33, ${inf.c2}33)`, border: `1px solid ${inf.c1}40` }}
+              >
+                <Film className="w-5 h-5" style={{ color: inf.c1 }} />
+                <div className="absolute bottom-1 right-1 w-3.5 h-3.5 rounded-full flex items-center justify-center" style={{ background: "rgba(0,0,0,0.6)" }}>
+                  <div className="w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-l-[5px] ml-0.5" style={{ borderLeftColor: "white" }} />
+                </div>
+              </div>
+
+              {/* Reel info */}
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-semibold text-white mb-1">{p.reelTitle}</div>
+                <div className="flex flex-wrap gap-3 text-[11px]" style={{ color: DIM2 }}>
+                  <span>📅 {p.reelDate}</span>
+                  <span>🔗 Product: <span className="text-white font-medium">{p.name}</span></span>
+                </div>
+                <div className="flex flex-wrap gap-3 mt-2">
+                  {[
+                    { label: "Views",  value: fmtK(p.views),  color: PRIMARY  },
+                    { label: "Clicks", value: fmtK(p.linkClick), color: "#3B82F6" },
+                    { label: "DMs",    value: String(p.dm),   color: "#F97316" },
+                    { label: "Sales",  value: String(p.reelSales), color: GREEN },
+                  ].map(m => (
+                    <span key={m.label} className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: `${m.color}15`, color: m.color }}>
+                      {m.label}: {m.value}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* View on Instagram */}
+              <a
+                href="#"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shrink-0"
+                style={{ background: "rgba(14,165,233,0.1)", color: PRIMARY, border: "1px solid rgba(14,165,233,0.22)" }}
+                onMouseEnter={e => { e.currentTarget.style.background = PRIMARY; e.currentTarget.style.color = "hsl(222,47%,6%)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "rgba(14,165,233,0.1)"; e.currentTarget.style.color = PRIMARY; }}
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                View on Instagram
+              </a>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
 /* ─── Campaigns Section component ─── */
 function CampaignsSection() {
@@ -358,6 +660,11 @@ function InfluencersSection() {
   const [campaignFilter, setCampaignFilter] = useState("All Campaigns");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [page, setPage]                 = useState(1);
+  const [selectedInfluencer, setSelectedInfluencer] = useState<typeof influencerExtData[0] | null>(null);
+
+  if (selectedInfluencer) {
+    return <InfluencerDetailView inf={selectedInfluencer} onBack={() => setSelectedInfluencer(null)} />;
+  }
 
   const TOTAL    = 12;
   const PER_PAGE = 4;
@@ -554,6 +861,7 @@ function InfluencersSection() {
                     style={{ background: "rgba(14,165,233,0.1)", color: PRIMARY, border: "1px solid rgba(14,165,233,0.22)" }}
                     onMouseEnter={e => { e.currentTarget.style.background = PRIMARY; e.currentTarget.style.color = "hsl(222,47%,6%)"; e.currentTarget.style.border = `1px solid ${PRIMARY}`; }}
                     onMouseLeave={e => { e.currentTarget.style.background = "rgba(14,165,233,0.1)"; e.currentTarget.style.color = PRIMARY; e.currentTarget.style.border = "1px solid rgba(14,165,233,0.22)"; }}
+                    onClick={() => setSelectedInfluencer(inf)}
                   >
                     View Details
                   </button>
