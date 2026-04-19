@@ -1604,8 +1604,8 @@ function SettingsSection() {
           <p className="text-xs" style={{ color: DIM2 }}>Use these keys to access the ROASTrack API</p>
         </div>
         {[
-          { label: "Live API Key",    key: "sk_live_aB3xZ9qK2mN7pL4rT8vU1wE5yH0jI6oC", env: "Production" },
-          { label: "Test API Key",    key: "sk_test_cD7fG2kL5nP9sR1tX4uV8wB3yH6jM0oQ", env: "Sandbox" },
+          { label: "Live API Key", key: "sk_live_" + "•".repeat(24), env: "Production" },
+          { label: "Test API Key", key: "sk_test_" + "•".repeat(24), env: "Sandbox" },
         ].map(({ label, key, env }) => (
           <div key={label} className="rounded-2xl p-5" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
             <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
