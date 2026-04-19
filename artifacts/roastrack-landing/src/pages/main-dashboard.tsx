@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -6,6 +6,8 @@ import {
   Search, Bell, ShoppingCart, Megaphone, CheckCircle2, TrendingUp,
   ArrowUpRight, ChevronRight, Star, Zap, Calendar, Menu, X,
   Eye, Link2, MessageCircle, Mail, Download, ChevronDown, FileText,
+  EyeOff, Copy, Plus, Pencil, Trash2, FlaskConical,
+  UserCircle2, Palette, Lock, ShieldCheck, Monitor, SunMoon,
 } from "lucide-react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -915,6 +917,778 @@ function ReportsSection() {
   );
 }
 
+/* ─── Modal helpers (top-level to prevent input blink) ─── */
+function ModalOverlay({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.65)", backdropFilter: "blur(6px)" }}
+      onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      {children}
+    </div>
+  );
+}
+function ModalCloseBtn({ onClose }: { onClose: () => void }) {
+  return (
+    <button
+      onClick={onClose}
+      className="absolute top-4 right-4 w-8 h-8 rounded-xl flex items-center justify-center transition-all"
+      style={{ background: "rgba(255,255,255,0.06)", color: DIM }}
+      onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.12)"; e.currentTarget.style.color = "white"; }}
+      onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.06)"; e.currentTarget.style.color = DIM; }}
+    >
+      <X className="w-4 h-4" />
+    </button>
+  );
+}
+
+/* ─── Pixel mock data ─── */
+const pixelsData = [
+  {
+    id: "PX-001", name: "Main Store Pixel", url: "mamaearth.in",
+    status: "Active", hits: "24.8K", sales: "₹12.4L",
+    events: ["pageview", "purchase", "add_to_cart"],
+    created: "Mar 15, 2025",
+  },
+  {
+    id: "PX-002", name: "Campaign Pixel – Summer", url: "mamaearth.in/summer",
+    status: "Active", hits: "9.2K", sales: "₹5.1L",
+    events: ["pageview", "purchase"],
+    created: "Apr 1, 2025",
+  },
+  {
+    id: "PX-003", name: "Winter Collection Pixel", url: "mamaearth.in/winter",
+    status: "Inactive", hits: "3.1K", sales: "₹1.8L",
+    events: ["pageview"],
+    created: "Apr 5, 2025",
+  },
+];
+
+/* ─── Create Pixel Modal (top-level) ─── */
+function CreatePixelModal({ step, setStep, onClose }: {
+  step: 1 | 2; setStep: (s: 1 | 2) => void; onClose: () => void;
+}) {
+  const [pixelName, setPixelName] = useState("");
+  const [pixelUrl, setPixelUrl]   = useState("");
+  const [copied, setCopied]       = useState(false);
+  const snippet = `<script>
+(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;
+j.src='https://cdn.roastrack.com/pixel.js?id='+i+dl;
+f.parentNode.insertBefore(j,f);})(window,document,'script','rLayer','PX-${Date.now().toString(36).toUpperCase()}');
+</script>`.trim();
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(snippet).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
+  };
+
+  return (
+    <ModalOverlay onClose={onClose}>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96, y: 12 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.22 }}
+        className="relative w-full max-w-md rounded-2xl p-6"
+        style={{ background: "hsl(222,47%,9%)", border: `1px solid ${BORDER}`, boxShadow: "0 24px 80px rgba(0,0,0,0.7)" }}
+      >
+        <ModalCloseBtn onClose={onClose} />
+
+        {/* Steps indicator */}
+        <div className="flex items-center gap-2 mb-5">
+          {[1, 2].map(s => (
+            <div key={s} className="flex items-center gap-2">
+              <div
+                className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold transition-all"
+                style={step >= s
+                  ? { background: PRIMARY, color: "hsl(222,47%,6%)" }
+                  : { background: "rgba(255,255,255,0.07)", color: DIM2 }}
+              >{s}</div>
+              {s < 2 && <div className="w-12 h-px" style={{ background: step === 2 ? PRIMARY : "rgba(255,255,255,0.1)" }} />}
+            </div>
+          ))}
+          <span className="ml-2 text-xs font-semibold" style={{ color: DIM2 }}>
+            {step === 1 ? "Setup" : "Install Code"}
+          </span>
+        </div>
+
+        {step === 1 ? (
+          <>
+            <h2 className="text-base font-bold text-white mb-4">Create New Pixel</h2>
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: DIM2 }}>Pixel Name</label>
+                <input
+                  value={pixelName}
+                  onChange={e => setPixelName(e.target.value)}
+                  placeholder="e.g. Main Store Pixel"
+                  className="w-full rounded-xl px-3.5 py-2.5 text-sm text-white outline-none transition-all"
+                  style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${BORDER}`, caretColor: PRIMARY }}
+                  onFocus={e => { e.currentTarget.style.borderColor = PRIMARY; }}
+                  onBlur={e => { e.currentTarget.style.borderColor = BORDER; }}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: DIM2 }}>Store URL</label>
+                <input
+                  value={pixelUrl}
+                  onChange={e => setPixelUrl(e.target.value)}
+                  placeholder="e.g. yourstore.in"
+                  className="w-full rounded-xl px-3.5 py-2.5 text-sm text-white outline-none transition-all"
+                  style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${BORDER}`, caretColor: PRIMARY }}
+                  onFocus={e => { e.currentTarget.style.borderColor = PRIMARY; }}
+                  onBlur={e => { e.currentTarget.style.borderColor = BORDER; }}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: DIM2 }}>Track Events</label>
+                <div className="flex flex-wrap gap-2">
+                  {["pageview", "purchase", "add_to_cart", "checkout"].map(ev => (
+                    <span key={ev} className="text-xs px-2.5 py-1 rounded-lg font-medium" style={{ background: "rgba(14,165,233,0.1)", color: PRIMARY, border: "1px solid rgba(14,165,233,0.2)" }}>
+                      {ev}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => setStep(2)}
+              disabled={!pixelName || !pixelUrl}
+              className="mt-5 w-full py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
+              style={{ background: PRIMARY, color: "hsl(222,47%,6%)", opacity: (!pixelName || !pixelUrl) ? 0.45 : 1 }}
+            >
+              Continue →
+            </button>
+          </>
+        ) : (
+          <>
+            <h2 className="text-base font-bold text-white mb-1">Install Pixel Code</h2>
+            <p className="text-xs mb-4" style={{ color: DIM2 }}>Paste this snippet inside your store's &lt;head&gt; tag</p>
+            <div className="relative rounded-xl overflow-hidden mb-4" style={{ background: "hsl(222,47%,5%)", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <pre className="p-4 text-[11px] leading-relaxed overflow-x-auto" style={{ color: "rgba(255,255,255,0.7)", fontFamily: "monospace" }}>{snippet}</pre>
+              <button
+                onClick={handleCopy}
+                className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all"
+                style={{ background: copied ? "rgba(34,197,94,0.18)" : "rgba(255,255,255,0.08)", color: copied ? GREEN : DIM, border: `1px solid ${copied ? "rgba(34,197,94,0.3)" : "rgba(255,255,255,0.1)"}` }}
+              >
+                {copied ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                {copied ? "Copied!" : "Copy"}
+              </button>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => setStep(1)} className="flex-1 py-2.5 rounded-xl text-sm font-semibold" style={{ background: "rgba(255,255,255,0.05)", color: DIM, border: `1px solid ${BORDER}` }}>
+                ← Back
+              </button>
+              <button onClick={onClose} className="flex-1 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-all" style={{ background: PRIMARY, color: "hsl(222,47%,6%)" }}>
+                Done ✓
+              </button>
+            </div>
+          </>
+        )}
+      </motion.div>
+    </ModalOverlay>
+  );
+}
+
+/* ─── Pixels Section ─── */
+function PixelsSection() {
+  const [showModal, setShowModal] = useState(false);
+  const [modalStep, setModalStep] = useState<1 | 2>(1);
+  const [pixels, setPixels]       = useState(pixelsData);
+  const [filter, setFilter]       = useState("All");
+
+  const filterTabs = [
+    { label: "All",      key: "All"      },
+    { label: "Active",   key: "Active"   },
+    { label: "Inactive", key: "Inactive" },
+  ];
+  const filtered = filter === "All" ? pixels : pixels.filter(p => p.status === filter);
+
+  return (
+    <motion.div key="pixels" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="space-y-5">
+      {showModal && (
+        <CreatePixelModal
+          step={modalStep}
+          setStep={setModalStep}
+          onClose={() => { setShowModal(false); setModalStep(1); }}
+        />
+      )}
+
+      {/* Title row */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-xl font-bold text-white">Pixels</h1>
+          <p className="text-sm mt-0.5" style={{ color: DIM }}>Track conversions from influencer traffic</p>
+        </div>
+        <button
+          onClick={() => { setModalStep(1); setShowModal(true); }}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
+          style={{ background: PRIMARY, color: "hsl(222,47%,6%)" }}
+        >
+          <Plus className="w-4 h-4" /> Create Pixel
+        </button>
+      </div>
+
+      {/* Stats bar */}
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: "Total Pixels", value: pixels.length, accent: PRIMARY },
+          { label: "Active",       value: pixels.filter(p => p.status === "Active").length, accent: GREEN },
+          { label: "Total Hits",   value: "37.1K", accent: PURPLE },
+        ].map(s => (
+          <div key={s.label} className="rounded-2xl px-4 py-3.5" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+            <div className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: DIM2 }}>{s.label}</div>
+            <div className="text-xl font-bold" style={{ color: s.accent }}>{s.value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Filter tabs */}
+      <div className="flex items-center gap-1 p-1 rounded-xl w-fit" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+        {filterTabs.map(tab => {
+          const isA = filter === tab.key;
+          return (
+            <button key={tab.key} onClick={() => setFilter(tab.key)}
+              className="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all"
+              style={{ background: isA ? PRIMARY : "transparent", color: isA ? "hsl(222,47%,6%)" : DIM }}>
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Pixel cards */}
+      <div className="space-y-3">
+        {filtered.map((px, i) => {
+          const isActive = px.status === "Active";
+          return (
+            <motion.div key={px.id}
+              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: i * 0.07 }}
+              className="rounded-2xl p-5"
+              style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+              <div className="flex items-start justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                    style={{ background: isActive ? "rgba(14,165,233,0.1)" : "rgba(255,255,255,0.05)", border: `1px solid ${isActive ? "rgba(14,165,233,0.22)" : "rgba(255,255,255,0.08)"}` }}>
+                    <FlaskConical className="w-4 h-4" style={{ color: isActive ? PRIMARY : DIM2 }} />
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold text-white">{px.name}</div>
+                    <div className="text-xs mt-0.5 flex items-center gap-1.5" style={{ color: DIM2 }}>
+                      <Link2 className="w-3 h-3" />{px.url}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
+                    style={isActive
+                      ? { background: "rgba(34,197,94,0.12)", color: GREEN, border: "1px solid rgba(34,197,94,0.25)" }
+                      : { background: "rgba(255,255,255,0.05)", color: DIM, border: "1px solid rgba(255,255,255,0.1)" }}>
+                    {px.status}
+                  </span>
+                  <button className="w-7 h-7 rounded-lg flex items-center justify-center transition-all"
+                    style={{ background: "rgba(255,255,255,0.04)", color: DIM2, border: "1px solid rgba(255,255,255,0.07)" }}
+                    onMouseEnter={e => { e.currentTarget.style.color = "white"; e.currentTarget.style.background = "rgba(255,255,255,0.09)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = DIM2; e.currentTarget.style.background = "rgba(255,255,255,0.04)"; }}>
+                    <Pencil className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => setPixels(prev => prev.filter(p => p.id !== px.id))}
+                    className="w-7 h-7 rounded-lg flex items-center justify-center transition-all"
+                    style={{ background: "rgba(239,68,68,0.07)", color: "hsl(0,84%,70%)", border: "1px solid rgba(239,68,68,0.15)" }}
+                    onMouseEnter={e => { e.currentTarget.style.background = "rgba(239,68,68,0.18)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = "rgba(239,68,68,0.07)"; }}>
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Metrics */}
+              <div className="grid grid-cols-3 gap-2.5 mt-4 mb-4">
+                {[
+                  { label: "Hits",   value: px.hits },
+                  { label: "Sales",  value: px.sales },
+                  { label: "Created", value: px.created },
+                ].map(m => (
+                  <div key={m.label} className="rounded-xl px-3 py-2.5" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                    <div className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: DIM2 }}>{m.label}</div>
+                    <div className="text-sm font-bold text-white">{m.value}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Events */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[11px]" style={{ color: DIM2 }}>Events:</span>
+                {px.events.map(ev => (
+                  <span key={ev} className="text-[11px] px-2 py-0.5 rounded-md font-medium"
+                    style={{ background: "rgba(14,165,233,0.09)", color: PRIMARY, border: "1px solid rgba(14,165,233,0.18)" }}>
+                    {ev}
+                  </span>
+                ))}
+              </div>
+
+              {/* Code button */}
+              <button
+                onClick={() => { setModalStep(2); setShowModal(true); }}
+                className="mt-4 flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all hover:opacity-80"
+                style={{ background: "rgba(14,165,233,0.08)", color: PRIMARY, border: "1px solid rgba(14,165,233,0.2)" }}>
+                <Code2 className="w-3.5 h-3.5" /> View Install Code
+              </button>
+            </motion.div>
+          );
+        })}
+      </div>
+    </motion.div>
+  );
+}
+
+/* ─── Settings Section ─── */
+const SETTINGS_TABS = [
+  { key: "general",       label: "General",          icon: Settings },
+  { key: "account",       label: "Account",           icon: UserCircle2 },
+  { key: "appearance",    label: "Appearance",        icon: Palette },
+  { key: "notifications", label: "Notifications",     icon: Bell },
+  { key: "password",      label: "Password & Auth",   icon: Lock },
+  { key: "team",          label: "Team Members",      icon: Users },
+  { key: "billing",       label: "Billing & Plan",    icon: Star },
+  { key: "store",         label: "Store",             icon: ShoppingCart },
+  { key: "api",           label: "API Keys",          icon: ShieldCheck },
+];
+
+function SettingsSection() {
+  const [activeTab, setActiveTab] = useState("general");
+  const [showKey, setShowKey]     = useState(false);
+  const [saved, setSaved]         = useState(false);
+  const [theme, setTheme]         = useState("dark");
+  const [notifs, setNotifs]       = useState({ sales: true, newInf: true, weeklyReport: false, lowBudget: true });
+  const [twoFA, setTwoFA]         = useState(false);
+
+  const handleSave = () => { setSaved(true); setTimeout(() => setSaved(false), 2000); };
+
+  function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
+    return (
+      <button onClick={onToggle}
+        className="w-11 h-6 rounded-full relative transition-all shrink-0"
+        style={{ background: on ? PRIMARY : "rgba(255,255,255,0.1)", border: `1px solid ${on ? PRIMARY : "rgba(255,255,255,0.15)"}` }}>
+        <div className="w-4 h-4 rounded-full bg-white absolute top-0.5 transition-all"
+          style={{ left: on ? "calc(100% - 1.25rem)" : "0.125rem", boxShadow: "0 1px 4px rgba(0,0,0,0.4)" }} />
+      </button>
+    );
+  }
+
+  const renderTab = () => {
+    if (activeTab === "general") return (
+      <div className="space-y-5">
+        <div>
+          <h2 className="text-base font-bold text-white mb-0.5">General Settings</h2>
+          <p className="text-xs" style={{ color: DIM2 }}>Manage your workspace preferences</p>
+        </div>
+        {[
+          { label: "Store Name",    placeholder: "Mamaearth", sub: "This is your brand name shown across ROASTrack." },
+          { label: "Store Website", placeholder: "https://mamaearth.in", sub: "Your primary store URL." },
+          { label: "Industry",      placeholder: "Beauty & Personal Care", sub: "Used for analytics benchmarking." },
+          { label: "Time Zone",     placeholder: "Asia/Kolkata (IST)", sub: "All reports will use this timezone." },
+        ].map(f => (
+          <div key={f.label} className="space-y-1.5">
+            <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: DIM2 }}>{f.label}</label>
+            <input
+              defaultValue={f.placeholder}
+              className="w-full rounded-xl px-3.5 py-2.5 text-sm text-white outline-none transition-all"
+              style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${BORDER}`, caretColor: PRIMARY }}
+              onFocus={e => { e.currentTarget.style.borderColor = PRIMARY; }}
+              onBlur={e => { e.currentTarget.style.borderColor = BORDER; }}
+            />
+            <p className="text-xs" style={{ color: DIM2 }}>{f.sub}</p>
+          </div>
+        ))}
+        <button onClick={handleSave}
+          className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
+          style={{ background: saved ? GREEN : PRIMARY, color: "hsl(222,47%,6%)" }}>
+          {saved ? "✓ Saved!" : "Save Changes"}
+        </button>
+      </div>
+    );
+
+    if (activeTab === "account") return (
+      <div className="space-y-5">
+        <div>
+          <h2 className="text-base font-bold text-white mb-0.5">Account</h2>
+          <p className="text-xs" style={{ color: DIM2 }}>Manage your personal account details</p>
+        </div>
+        {[
+          { label: "Store Name",  placeholder: "Mamaearth", sub: "This name appears on invoices and reports." },
+          { label: "Email",       placeholder: "admin@mamaearth.in", sub: "Used for login and notifications." },
+          { label: "Phone",       placeholder: "+91 98765 43210", sub: "Optional. Used for 2FA." },
+          { label: "Role",        placeholder: "Admin", sub: "Your access level in this workspace." },
+        ].map(f => (
+          <div key={f.label} className="space-y-1.5">
+            <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: DIM2 }}>{f.label}</label>
+            <input
+              defaultValue={f.placeholder}
+              className="w-full rounded-xl px-3.5 py-2.5 text-sm text-white outline-none transition-all"
+              style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${BORDER}`, caretColor: PRIMARY }}
+              onFocus={e => { e.currentTarget.style.borderColor = PRIMARY; }}
+              onBlur={e => { e.currentTarget.style.borderColor = BORDER; }}
+            />
+            <p className="text-xs" style={{ color: DIM2 }}>{f.sub}</p>
+          </div>
+        ))}
+        <button onClick={handleSave}
+          className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
+          style={{ background: saved ? GREEN : PRIMARY, color: "hsl(222,47%,6%)" }}>
+          {saved ? "✓ Saved!" : "Save Changes"}
+        </button>
+      </div>
+    );
+
+    if (activeTab === "appearance") return (
+      <div className="space-y-5">
+        <div>
+          <h2 className="text-base font-bold text-white mb-0.5">Appearance</h2>
+          <p className="text-xs" style={{ color: DIM2 }}>Customize how ROASTrack looks for you</p>
+        </div>
+        <div className="space-y-2">
+          <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: DIM2 }}>Theme</label>
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { key: "dark",   label: "Dark",   icon: Monitor,  desc: "Easy on the eyes" },
+              { key: "light",  label: "Light",  icon: SunMoon,  desc: "Classic look" },
+              { key: "system", label: "System", icon: Monitor,  desc: "Follows OS" },
+            ].map(t => (
+              <button key={t.key} onClick={() => setTheme(t.key)}
+                className="flex flex-col items-center gap-2 p-4 rounded-2xl transition-all"
+                style={{
+                  background: theme === t.key ? "rgba(14,165,233,0.12)" : "rgba(255,255,255,0.03)",
+                  border: `1px solid ${theme === t.key ? PRIMARY : BORDER}`,
+                }}>
+                <t.icon className="w-5 h-5" style={{ color: theme === t.key ? PRIMARY : DIM2 }} />
+                <span className="text-xs font-semibold" style={{ color: theme === t.key ? PRIMARY : DIM }}>{t.label}</span>
+                <span className="text-[11px]" style={{ color: DIM2 }}>{t.desc}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="space-y-3">
+          <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: DIM2 }}>Accent Color</label>
+          <div className="flex items-center gap-3 flex-wrap">
+            {[PRIMARY, PURPLE, GREEN, "hsl(22,100%,57%)", "hsl(338,82%,52%)"].map(c => (
+              <button key={c}
+                className="w-8 h-8 rounded-full border-2 transition-all"
+                style={{ background: c, borderColor: "transparent", boxShadow: `0 0 0 3px ${c}40` }} />
+            ))}
+          </div>
+        </div>
+        <button onClick={handleSave}
+          className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
+          style={{ background: saved ? GREEN : PRIMARY, color: "hsl(222,47%,6%)" }}>
+          {saved ? "✓ Saved!" : "Save Preferences"}
+        </button>
+      </div>
+    );
+
+    if (activeTab === "notifications") return (
+      <div className="space-y-5">
+        <div>
+          <h2 className="text-base font-bold text-white mb-0.5">Notifications</h2>
+          <p className="text-xs" style={{ color: DIM2 }}>Choose what you want to be alerted about</p>
+        </div>
+        <div className="space-y-0 rounded-2xl overflow-hidden" style={{ border: `1px solid ${BORDER}` }}>
+          {[
+            { key: "sales",        label: "New Sale Detected",   sub: "Instant alert when an influencer drives a sale" },
+            { key: "newInf",       label: "New Influencer Added", sub: "When a team member adds a new influencer" },
+            { key: "weeklyReport", label: "Weekly Report Email",  sub: "Summary sent every Monday morning" },
+            { key: "lowBudget",    label: "Low Budget Warning",   sub: "Alert when campaign budget drops below 10%" },
+          ].map(({ key, label, sub }, i) => (
+            <div key={key}
+              className="flex items-center justify-between px-5 py-4"
+              style={{ background: i % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent", borderBottom: i < 3 ? `1px solid ${BORDER}` : "none" }}>
+              <div>
+                <div className="text-sm font-semibold text-white">{label}</div>
+                <div className="text-xs mt-0.5" style={{ color: DIM2 }}>{sub}</div>
+              </div>
+              <Toggle on={notifs[key as keyof typeof notifs]} onToggle={() => setNotifs(p => ({ ...p, [key]: !p[key as keyof typeof notifs] }))} />
+            </div>
+          ))}
+        </div>
+        <button onClick={handleSave}
+          className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
+          style={{ background: saved ? GREEN : PRIMARY, color: "hsl(222,47%,6%)" }}>
+          {saved ? "✓ Saved!" : "Save Preferences"}
+        </button>
+      </div>
+    );
+
+    if (activeTab === "password") return (
+      <div className="space-y-5">
+        <div>
+          <h2 className="text-base font-bold text-white mb-0.5">Password & Auth</h2>
+          <p className="text-xs" style={{ color: DIM2 }}>Manage your login security</p>
+        </div>
+        {[
+          { label: "Current Password", placeholder: "••••••••" },
+          { label: "New Password",     placeholder: "Min 8 characters" },
+          { label: "Confirm Password", placeholder: "Repeat new password" },
+        ].map(f => (
+          <div key={f.label} className="space-y-1.5">
+            <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: DIM2 }}>{f.label}</label>
+            <input type="password" placeholder={f.placeholder}
+              className="w-full rounded-xl px-3.5 py-2.5 text-sm text-white outline-none transition-all"
+              style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${BORDER}`, caretColor: PRIMARY }}
+              onFocus={e => { e.currentTarget.style.borderColor = PRIMARY; }}
+              onBlur={e => { e.currentTarget.style.borderColor = BORDER; }} />
+          </div>
+        ))}
+        <div className="rounded-2xl p-4" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm font-semibold text-white">Two-Factor Authentication</div>
+              <div className="text-xs mt-0.5" style={{ color: DIM2 }}>Add extra security with OTP on login</div>
+            </div>
+            <Toggle on={twoFA} onToggle={() => setTwoFA(p => !p)} />
+          </div>
+        </div>
+        <button onClick={handleSave}
+          className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
+          style={{ background: saved ? GREEN : PRIMARY, color: "hsl(222,47%,6%)" }}>
+          {saved ? "✓ Saved!" : "Update Password"}
+        </button>
+      </div>
+    );
+
+    if (activeTab === "team") return (
+      <div className="space-y-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-base font-bold text-white mb-0.5">Team Members</h2>
+            <p className="text-xs" style={{ color: DIM2 }}>Manage who has access to your workspace</p>
+          </div>
+          <button className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold hover:opacity-90 transition-all"
+            style={{ background: PRIMARY, color: "hsl(222,47%,6%)" }}>
+            <Plus className="w-3.5 h-3.5" /> Invite
+          </button>
+        </div>
+        <div className="space-y-0 rounded-2xl overflow-hidden" style={{ border: `1px solid ${BORDER}` }}>
+          {[
+            { name: "John Doe",   email: "john@mamaearth.in",   role: "Admin",  avatar: "JD", c1: PRIMARY, c2: PURPLE },
+            { name: "Priya Shah", email: "priya@mamaearth.in",  role: "Editor", avatar: "PS", c1: "hsl(338,82%,52%)", c2: "hsl(22,100%,57%)" },
+            { name: "Rahul Dev",  email: "rahul@mamaearth.in",  role: "Viewer", avatar: "RD", c1: GREEN, c2: PRIMARY },
+          ].map(({ name, email, role, avatar, c1, c2 }, i) => (
+            <div key={email}
+              className="flex items-center gap-3 px-5 py-3.5"
+              style={{ background: i % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent", borderBottom: i < 2 ? `1px solid ${BORDER}` : "none" }}>
+              <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                style={{ background: `linear-gradient(135deg, ${c1}, ${c2})`, color: "white" }}>{avatar}</div>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-semibold text-white">{name}</div>
+                <div className="text-xs" style={{ color: DIM2 }}>{email}</div>
+              </div>
+              <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
+                style={role === "Admin"
+                  ? { background: "rgba(14,165,233,0.12)", color: PRIMARY, border: "1px solid rgba(14,165,233,0.22)" }
+                  : role === "Editor"
+                  ? { background: "rgba(270,60%,68%,0.12)", color: PURPLE, border: `1px solid ${PURPLE}44` }
+                  : { background: "rgba(255,255,255,0.05)", color: DIM, border: "1px solid rgba(255,255,255,0.1)" }}>{role}</span>
+              {role !== "Admin" && (
+                <button className="w-7 h-7 rounded-lg flex items-center justify-center transition-all ml-1"
+                  style={{ background: "rgba(239,68,68,0.07)", color: "hsl(0,84%,70%)", border: "1px solid rgba(239,68,68,0.15)" }}
+                  onMouseEnter={e => { e.currentTarget.style.background = "rgba(239,68,68,0.18)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "rgba(239,68,68,0.07)"; }}>
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+
+    if (activeTab === "billing") return (
+      <div className="space-y-5">
+        <div>
+          <h2 className="text-base font-bold text-white mb-0.5">Billing & Plan</h2>
+          <p className="text-xs" style={{ color: DIM2 }}>Manage your subscription and invoices</p>
+        </div>
+        <div className="rounded-2xl p-5" style={{ background: `linear-gradient(135deg, rgba(14,165,233,0.12), rgba(14,165,233,0.04))`, border: `1px solid rgba(14,165,233,0.25)` }}>
+          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: DIM2 }}>Current Plan</div>
+              <div className="text-lg font-bold text-white">Pro Plan</div>
+            </div>
+            <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: GREEN + "22", color: GREEN, border: `1px solid ${GREEN}44` }}>Active</span>
+          </div>
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            {[
+              { label: "Next Billing", value: "May 19, 2026" },
+              { label: "Amount",       value: "₹2,999/mo" },
+            ].map(m => (
+              <div key={m.label} className="rounded-xl px-3 py-2.5" style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${BORDER}` }}>
+                <div className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: DIM2 }}>{m.label}</div>
+                <div className="text-sm font-bold text-white">{m.value}</div>
+              </div>
+            ))}
+          </div>
+          <button className="w-full py-2 rounded-xl text-xs font-semibold transition-all hover:opacity-90"
+            style={{ background: PRIMARY, color: "hsl(222,47%,6%)" }}>Upgrade to Enterprise →</button>
+        </div>
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: DIM2 }}>Recent Invoices</div>
+          <div className="space-y-0 rounded-2xl overflow-hidden" style={{ border: `1px solid ${BORDER}` }}>
+            {[
+              { date: "Apr 19, 2026", amount: "₹2,999", status: "Paid" },
+              { date: "Mar 19, 2026", amount: "₹2,999", status: "Paid" },
+              { date: "Feb 19, 2026", amount: "₹2,999", status: "Paid" },
+            ].map(({ date, amount, status }, i) => (
+              <div key={date}
+                className="flex items-center justify-between px-5 py-3.5"
+                style={{ background: i % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent", borderBottom: i < 2 ? `1px solid ${BORDER}` : "none" }}>
+                <div className="text-sm text-white">{date}</div>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-bold" style={{ color: DIM }}>{amount}</span>
+                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: GREEN + "18", color: GREEN }}>{status}</span>
+                  <button className="text-xs" style={{ color: PRIMARY }}>PDF</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+
+    if (activeTab === "store") return (
+      <div className="space-y-5">
+        <div>
+          <h2 className="text-base font-bold text-white mb-0.5">Store Settings</h2>
+          <p className="text-xs" style={{ color: DIM2 }}>Connect and configure your e-commerce store</p>
+        </div>
+        <div className="rounded-2xl p-5" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: GREEN + "18", border: `1px solid ${GREEN}33` }}>
+              <ShoppingCart className="w-5 h-5" style={{ color: GREEN }} />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-white">Shopify Integration</div>
+              <div className="text-xs" style={{ color: GREEN }}>Connected · mamaearth.myshopify.com</div>
+            </div>
+            <span className="ml-auto text-[11px] font-semibold px-2.5 py-1 rounded-full" style={{ background: GREEN + "18", color: GREEN, border: `1px solid ${GREEN}33` }}>Active</span>
+          </div>
+          {[
+            { label: "Shop Domain",   placeholder: "mamaearth.myshopify.com" },
+            { label: "Currency",      placeholder: "INR (₹)" },
+            { label: "Order Prefix",  placeholder: "ROAS-" },
+          ].map(f => (
+            <div key={f.label} className="space-y-1.5 mb-3">
+              <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: DIM2 }}>{f.label}</label>
+              <input defaultValue={f.placeholder}
+                className="w-full rounded-xl px-3.5 py-2.5 text-sm text-white outline-none transition-all"
+                style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${BORDER}`, caretColor: PRIMARY }}
+                onFocus={e => { e.currentTarget.style.borderColor = PRIMARY; }}
+                onBlur={e => { e.currentTarget.style.borderColor = BORDER; }} />
+            </div>
+          ))}
+          <button onClick={handleSave}
+            className="mt-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
+            style={{ background: saved ? GREEN : PRIMARY, color: "hsl(222,47%,6%)" }}>
+            {saved ? "✓ Saved!" : "Save Store Settings"}
+          </button>
+        </div>
+      </div>
+    );
+
+    if (activeTab === "api") return (
+      <div className="space-y-5">
+        <div>
+          <h2 className="text-base font-bold text-white mb-0.5">API Keys</h2>
+          <p className="text-xs" style={{ color: DIM2 }}>Use these keys to access the ROASTrack API</p>
+        </div>
+        {[
+          { label: "Live API Key",    key: "sk_live_aB3xZ9qK2mN7pL4rT8vU1wE5yH0jI6oC", env: "Production" },
+          { label: "Test API Key",    key: "sk_test_cD7fG2kL5nP9sR1tX4uV8wB3yH6jM0oQ", env: "Sandbox" },
+        ].map(({ label, key, env }) => (
+          <div key={label} className="rounded-2xl p-5" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+            <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+              <div className="text-sm font-semibold text-white">{label}</div>
+              <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
+                style={env === "Production"
+                  ? { background: GREEN + "18", color: GREEN, border: `1px solid ${GREEN}33` }
+                  : { background: "rgba(255,255,255,0.07)", color: DIM, border: "1px solid rgba(255,255,255,0.1)" }}>{env}</span>
+            </div>
+            <div className="flex items-center gap-2 rounded-xl px-3.5 py-2.5" style={{ background: "hsl(222,47%,5%)", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <code className="flex-1 text-xs truncate" style={{ color: DIM, fontFamily: "monospace" }}>
+                {showKey ? key : key.slice(0, 12) + "••••••••••••••••••••••••"}
+              </code>
+              <button onClick={() => setShowKey(p => !p)} className="shrink-0" style={{ color: DIM2 }}>
+                {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+              <button onClick={() => navigator.clipboard.writeText(key)} className="shrink-0" style={{ color: DIM2 }}
+                onMouseEnter={e => { e.currentTarget.style.color = PRIMARY; }}
+                onMouseLeave={e => { e.currentTarget.style.color = DIM2; }}>
+                <Copy className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        ))}
+        <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
+          style={{ background: "rgba(239,68,68,0.08)", color: "hsl(0,84%,70%)", border: "1px solid rgba(239,68,68,0.2)" }}>
+          Regenerate Keys
+        </button>
+      </div>
+    );
+
+    return null;
+  };
+
+  return (
+    <motion.div key="settings" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
+      <div className="mb-5">
+        <h1 className="text-xl font-bold text-white">Settings</h1>
+        <p className="text-sm mt-0.5" style={{ color: DIM }}>Manage your account, workspace, and integrations</p>
+      </div>
+
+      <div className="flex gap-5 items-start">
+        {/* Left vertical nav */}
+        <aside className="w-52 shrink-0 sticky top-0">
+          <nav className="flex flex-col gap-0.5">
+            {SETTINGS_TABS.map(({ key, label, icon: Icon }) => {
+              const isA = activeTab === key;
+              return (
+                <button key={key} onClick={() => setActiveTab(key)}
+                  className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium w-full text-left transition-all"
+                  style={{
+                    background: isA ? "rgba(14,165,233,0.12)" : "transparent",
+                    color: isA ? PRIMARY : DIM,
+                    border: isA ? "1px solid rgba(14,165,233,0.22)" : "1px solid transparent",
+                  }}
+                  onMouseEnter={e => { if (!isA) { e.currentTarget.style.color = "rgba(255,255,255,0.75)"; e.currentTarget.style.background = "rgba(255,255,255,0.04)"; } }}
+                  onMouseLeave={e => { if (!isA) { e.currentTarget.style.color = DIM; e.currentTarget.style.background = "transparent"; } }}>
+                  <Icon className="w-4 h-4 shrink-0" />
+                  {label}
+                  {isA && <ChevronRight className="w-3.5 h-3.5 ml-auto opacity-50" />}
+                </button>
+              );
+            })}
+          </nav>
+        </aside>
+
+        {/* Right content */}
+        <div className="flex-1 min-w-0 rounded-2xl p-6" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+          <AnimatePresence mode="wait">
+            <motion.div key={activeTab}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.2 }}>
+              {renderTab()}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 /* ─── Main ─── */
 export default function MainDashboard() {
   const [, setLocation] = useLocation();
@@ -966,12 +1740,14 @@ export default function MainDashboard() {
       <div className="px-3 pb-4 flex flex-col gap-1 border-t pt-3" style={{ borderColor: BORDER }}>
         <button
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full text-left transition-all"
-          style={{ color: DIM }}
-          onMouseEnter={e => { e.currentTarget.style.color = "rgba(255,255,255,0.75)"; e.currentTarget.style.background = "rgba(255,255,255,0.04)"; }}
-          onMouseLeave={e => { e.currentTarget.style.color = DIM; e.currentTarget.style.background = "transparent"; }}
+          onClick={() => { setActiveNav("Settings"); setSidebarOpen(false); }}
+          style={{ color: activeNav === "Settings" ? PRIMARY : DIM, background: activeNav === "Settings" ? "rgba(14,165,233,0.12)" : "transparent", border: activeNav === "Settings" ? "1px solid rgba(14,165,233,0.22)" : "1px solid transparent" }}
+          onMouseEnter={e => { if (activeNav !== "Settings") { e.currentTarget.style.color = "rgba(255,255,255,0.75)"; e.currentTarget.style.background = "rgba(255,255,255,0.04)"; } }}
+          onMouseLeave={e => { if (activeNav !== "Settings") { e.currentTarget.style.color = DIM; e.currentTarget.style.background = "transparent"; } }}
         >
           <Settings className="w-4 h-4" />
           Settings
+          {activeNav === "Settings" && <ChevronRight className="w-3.5 h-3.5 ml-auto opacity-50" />}
         </button>
         <div className="mt-2 rounded-xl p-3" style={{ background: "rgba(14,165,233,0.06)", border: "1px solid rgba(14,165,233,0.15)" }}>
           <div className="flex items-center gap-1.5 mb-1.5">
@@ -1071,8 +1847,14 @@ export default function MainDashboard() {
           {/* ══ REPORTS VIEW ══ */}
           {activeNav === "Reports" && <ReportsSection />}
 
+          {/* ══ PIXELS VIEW ══ */}
+          {activeNav === "Pixels" && <PixelsSection />}
+
+          {/* ══ SETTINGS VIEW ══ */}
+          {activeNav === "Settings" && <SettingsSection />}
+
           {/* ══ DASHBOARD VIEW ══ */}
-          {activeNav !== "Campaigns" && activeNav !== "Influencers" && activeNav !== "Reports" && <div className="space-y-4">
+          {activeNav !== "Campaigns" && activeNav !== "Influencers" && activeNav !== "Reports" && activeNav !== "Pixels" && activeNav !== "Settings" && <div className="space-y-4">
 
           {/* Page title — Improvement 7: calendar icon */}
           <div className="flex items-center justify-between flex-wrap gap-3">
