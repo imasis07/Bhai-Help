@@ -436,6 +436,7 @@ function NewCampaignForm({ onClose }: { onClose: () => void }) {
   const [influencerCosts, setInfluencerCosts] = useState<Record<string, { selected: boolean; cost: string }>>(
     Object.fromEntries(influencerExtData.map(inf => [inf.handle, { selected: false, cost: "" }]))
   );
+  const [influencerBudget, setInfluencerBudget] = useState("");
   const [copied, setCopied] = useState<number | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
@@ -553,20 +554,61 @@ function NewCampaignForm({ onClose }: { onClose: () => void }) {
         </button>
       </div>
 
-      {/* ── Campaign Name ── */}
-      <div className="rounded-2xl p-5 space-y-1.5" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
-        <label className="text-xs font-semibold tracking-wide uppercase" style={{ color: DIM2 }}>
-          Campaign Name <span style={{ color: "hsl(0,84%,70%)" }}>*</span>
-        </label>
-        <input
-          value={name}
-          onChange={e => setName(e.target.value)}
-          placeholder="e.g. Summer Sale 2025"
-          className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all font-medium"
-          style={inp}
-          onFocus={focusIn}
-          onBlur={focusOut}
-        />
+      {/* ── Campaign Name + Influencer Cost ── */}
+      <div className="rounded-2xl p-5 space-y-4" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+        {/* Campaign Name */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold tracking-wide uppercase" style={{ color: DIM2 }}>
+            Campaign Name <span style={{ color: "hsl(0,84%,70%)" }}>*</span>
+          </label>
+          <input
+            value={name}
+            onChange={e => setName(e.target.value)}
+            placeholder="e.g. Summer Sale 2025"
+            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all font-medium"
+            style={inp}
+            onFocus={focusIn}
+            onBlur={focusOut}
+          />
+        </div>
+
+        {/* Divider */}
+        <div className="h-px" style={{ background: BORDER }} />
+
+        {/* Influencer Cost */}
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2">
+            <Users className="w-3.5 h-3.5" style={{ color: PRIMARY }} />
+            <label className="text-xs font-semibold tracking-wide uppercase" style={{ color: DIM2 }}>
+              Influencer Cost <span className="normal-case font-normal" style={{ color: DIM2 }}>(Total Budget for Influencers)</span>
+            </label>
+          </div>
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold select-none" style={{ color: influencerBudget ? PRIMARY : DIM }}>₹</span>
+            <input
+              value={influencerBudget}
+              onChange={e => setInfluencerBudget(e.target.value.replace(/\D/g, ""))}
+              placeholder="e.g. 50,000"
+              className="w-full pl-9 pr-4 py-3 rounded-xl text-sm outline-none transition-all font-medium"
+              style={{
+                ...inp,
+                ...(influencerBudget ? { borderColor: PRIMARY, boxShadow: "0 0 0 3px rgba(14,165,233,0.1)" } : {}),
+              }}
+              onFocus={focusIn}
+              onBlur={focusOut}
+            />
+            {influencerBudget && (
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md" style={{ background: `${PRIMARY}15`, color: PRIMARY }}>
+                  ₹{Number(influencerBudget).toLocaleString("en-IN")}
+                </span>
+              </div>
+            )}
+          </div>
+          <p className="text-[11px]" style={{ color: DIM2 }}>
+            Yeh total budget hai jo aap influencers ko denge is campaign ke liye.
+          </p>
+        </div>
       </div>
 
       {/* ── Divider ── */}
