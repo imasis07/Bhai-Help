@@ -429,86 +429,109 @@ function InfluencerDetailView({ inf, onBack }: { inf: typeof influencerExtData[0
 
 /* ─── New Campaign Form ─── */
 function NewCampaignForm({ onClose }: { onClose: () => void }) {
-  const [name,        setName]        = useState("");
-  const [startDate,   setStartDate]   = useState("");
-  const [endDate,     setEndDate]     = useState("");
-  const [budget,      setBudget]      = useState("");
-  const [description, setDescription] = useState("");
+  const [name, setName] = useState("");
   const [products, setProducts] = useState([
-    { id: 1, name: "", price: "", link: "" },
+    { id: 1, name: "", price: "", originalLink: "", trackingLink: `https://roastrack.in/t/${Math.random().toString(36).slice(2, 9)}` },
   ]);
-  const [selectedInfluencers, setSelectedInfluencers] = useState<string[]>([]);
+  const [influencerCosts, setInfluencerCosts] = useState<Record<string, { selected: boolean; cost: string }>>(
+    Object.fromEntries(influencerExtData.map(inf => [inf.handle, { selected: false, cost: "" }]))
+  );
+  const [copied, setCopied] = useState<number | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
-  function generateLink(id: number) {
-    const hash = Math.random().toString(36).slice(2, 9);
-    setProducts(ps => ps.map(p => p.id === id ? { ...p, link: `https://roastrack.in/track/${hash}` } : p));
-  }
   function addProduct() {
-    setProducts(ps => [...ps, { id: Date.now(), name: "", price: "", link: "" }]);
+    setProducts(ps => [...ps, {
+      id: Date.now(), name: "", price: "", originalLink: "",
+      trackingLink: `https://roastrack.in/t/${Math.random().toString(36).slice(2, 9)}`,
+    }]);
   }
   function removeProduct(id: number) {
     setProducts(ps => ps.filter(p => p.id !== id));
   }
-  function updateProduct(id: number, field: "name" | "price", value: string) {
+  function updateProduct(id: number, field: "name" | "price" | "originalLink", value: string) {
     setProducts(ps => ps.map(p => p.id === id ? { ...p, [field]: value } : p));
   }
   function toggleInfluencer(handle: string) {
-    setSelectedInfluencers(prev =>
-      prev.includes(handle) ? prev.filter(h => h !== handle) : [...prev, handle]
-    );
+    setInfluencerCosts(prev => ({
+      ...prev,
+      [handle]: { ...prev[handle], selected: !prev[handle].selected },
+    }));
   }
+  function setInfluencerCost(handle: string, cost: string) {
+    setInfluencerCosts(prev => ({ ...prev, [handle]: { ...prev[handle], cost } }));
+  }
+  function copyLink(id: number, link: string) {
+    navigator.clipboard.writeText(link).catch(() => {});
+    setCopied(id);
+    setTimeout(() => setCopied(null), 1800);
+  }
+
+  const canSubmit = name.trim().length > 0;
 
   if (submitted) {
     return (
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
+        initial={{ opacity: 0, scale: 0.94 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center justify-center py-24 gap-5"
+        className="flex flex-col items-center justify-center py-28 gap-6"
       >
-        <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.3)" }}>
-          <CheckCircle2 className="w-8 h-8" style={{ color: GREEN }} />
-        </div>
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 280, damping: 22, delay: 0.1 }}
+          className="w-20 h-20 rounded-3xl flex items-center justify-center"
+          style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.3)", boxShadow: "0 0 40px rgba(34,197,94,0.18)" }}
+        >
+          <CheckCircle2 className="w-10 h-10" style={{ color: GREEN }} />
+        </motion.div>
         <div className="text-center">
-          <h2 className="text-xl font-bold text-white mb-1">Campaign Created! 🎉</h2>
-          <p className="text-sm" style={{ color: DIM }}>"{name || "New Campaign"}" has been added to your campaigns.</p>
+          <h2 className="text-2xl font-bold text-white mb-2">Campaign Created! 🎉</h2>
+          <p style={{ color: DIM }}>
+            <span className="text-white font-semibold">"{name}"</span> is ready to go.
+          </p>
         </div>
         <button
           onClick={onClose}
-          className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
+          className="px-7 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
           style={{ background: PRIMARY, color: "hsl(222,47%,6%)" }}
         >
-          Back to Campaigns
+          Back to Campaigns →
         </button>
       </motion.div>
     );
   }
 
-  const inputStyle = {
-    background: "rgba(255,255,255,0.04)",
+  const inp = {
+    background: "rgba(255,255,255,0.05)",
     border: `1px solid ${BORDER}`,
     color: "white",
     caretColor: PRIMARY,
   } as React.CSSProperties;
 
-  const labelStyle = { color: DIM2 } as React.CSSProperties;
-  const accentInputStyle = { borderColor: PRIMARY } as React.CSSProperties;
+  const focusIn  = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    e.currentTarget.style.borderColor = PRIMARY;
+    e.currentTarget.style.boxShadow = "0 0 0 3px rgba(14,165,233,0.1)";
+  };
+  const focusOut = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    e.currentTarget.style.borderColor = BORDER;
+    e.currentTarget.style.boxShadow = "none";
+  };
 
   return (
     <motion.div
       key="new-campaign"
-      initial={{ opacity: 0, x: 24 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -24 }}
-      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-      className="space-y-5"
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -12 }}
+      transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+      className="max-w-2xl mx-auto space-y-6 pb-8"
     >
-      {/* ── Header ── */}
-      <div className="flex items-center justify-between gap-4">
+      {/* ── Page title ── */}
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
             onClick={onClose}
-            className="flex items-center gap-2 text-sm font-medium transition-all group"
+            className="flex items-center gap-1.5 text-sm font-medium transition-all group"
             style={{ color: DIM }}
             onMouseEnter={e => { e.currentTarget.style.color = "white"; }}
             onMouseLeave={e => { e.currentTarget.style.color = DIM; }}
@@ -516,333 +539,289 @@ function NewCampaignForm({ onClose }: { onClose: () => void }) {
             <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
             Campaigns
           </button>
-          <span style={{ color: DIM2 }}>/</span>
+          <span style={{ color: "rgba(255,255,255,0.2)" }}>/</span>
           <span className="text-sm font-semibold text-white">New Campaign</span>
         </div>
         <button
           onClick={onClose}
           className="w-8 h-8 rounded-xl flex items-center justify-center transition-all"
           style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${BORDER}` }}
-          onMouseEnter={e => { e.currentTarget.style.background = "rgba(239,68,68,0.1)"; }}
-          onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}
+          onMouseEnter={e => { e.currentTarget.style.background = "rgba(239,68,68,0.12)"; e.currentTarget.style.borderColor = "rgba(239,68,68,0.3)"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.borderColor = BORDER; }}
         >
-          <X className="w-4 h-4" style={{ color: DIM }} />
+          <X className="w-3.5 h-3.5" style={{ color: DIM }} />
         </button>
       </div>
 
-      {/* ── Section 1: Campaign Details ── */}
-      <div className="rounded-2xl overflow-hidden" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
-        {/* Section header */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b" style={{ borderColor: BORDER }}>
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(14,165,233,0.12)", border: "1px solid rgba(14,165,233,0.25)" }}>
-            <FileText className="w-3.5 h-3.5" style={{ color: PRIMARY }} />
-          </div>
-          <div>
-            <h2 className="text-sm font-bold text-white">Campaign Details</h2>
-            <p className="text-[11px]" style={{ color: DIM2 }}>Basic info about your campaign</p>
-          </div>
-        </div>
-
-        <div className="p-5 space-y-4">
-          {/* Name */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold" style={labelStyle}>Campaign Name <span style={{ color: "hsl(0,84%,70%)" }}>*</span></label>
-            <input
-              value={name}
-              onChange={e => setName(e.target.value)}
-              placeholder="e.g. Summer Sale 2025"
-              className="w-full px-3.5 py-2.5 rounded-xl text-sm outline-none transition-all"
-              style={{ ...inputStyle, ...(name ? accentInputStyle : {}) }}
-              onFocus={e => { e.currentTarget.style.borderColor = PRIMARY; e.currentTarget.style.boxShadow = `0 0 0 3px rgba(14,165,233,0.1)`; }}
-              onBlur={e => { e.currentTarget.style.borderColor = name ? PRIMARY : BORDER; e.currentTarget.style.boxShadow = "none"; }}
-            />
-          </div>
-
-          {/* Date range */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold" style={labelStyle}>Campaign Period <span style={{ color: "hsl(0,84%,70%)" }}>*</span></label>
-            <div className="flex items-center gap-3">
-              <div className="relative flex-1">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" style={{ color: DIM2 }} />
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={e => setStartDate(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 rounded-xl text-sm outline-none transition-all"
-                  style={{ ...inputStyle, colorScheme: "dark" }}
-                  onFocus={e => { e.currentTarget.style.borderColor = PRIMARY; e.currentTarget.style.boxShadow = `0 0 0 3px rgba(14,165,233,0.1)`; }}
-                  onBlur={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.boxShadow = "none"; }}
-                />
-              </div>
-              <div className="flex items-center gap-1.5 shrink-0" style={{ color: DIM2 }}>
-                <div className="h-px w-3" style={{ background: DIM2 }} />
-                <ArrowUpRight className="w-3.5 h-3.5 rotate-45" />
-                <div className="h-px w-3" style={{ background: DIM2 }} />
-              </div>
-              <div className="relative flex-1">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" style={{ color: DIM2 }} />
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={e => setEndDate(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 rounded-xl text-sm outline-none transition-all"
-                  style={{ ...inputStyle, colorScheme: "dark" }}
-                  onFocus={e => { e.currentTarget.style.borderColor = PRIMARY; e.currentTarget.style.boxShadow = `0 0 0 3px rgba(14,165,233,0.1)`; }}
-                  onBlur={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.boxShadow = "none"; }}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Budget */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold" style={labelStyle}>Total Budget <span style={{ color: "hsl(0,84%,70%)" }}>*</span></label>
-            <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold" style={{ color: DIM }}>₹</span>
-              <input
-                value={budget}
-                onChange={e => setBudget(e.target.value.replace(/\D/g, ""))}
-                placeholder="50,000"
-                className="w-full pl-8 pr-3.5 py-2.5 rounded-xl text-sm outline-none transition-all"
-                style={{ ...inputStyle, ...(budget ? accentInputStyle : {}) }}
-                onFocus={e => { e.currentTarget.style.borderColor = PRIMARY; e.currentTarget.style.boxShadow = `0 0 0 3px rgba(14,165,233,0.1)`; }}
-                onBlur={e => { e.currentTarget.style.borderColor = budget ? PRIMARY : BORDER; e.currentTarget.style.boxShadow = "none"; }}
-              />
-            </div>
-          </div>
-
-          {/* Description */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold" style={labelStyle}>Description <span className="font-normal" style={{ color: DIM2 }}>(optional)</span></label>
-            <textarea
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-              placeholder="Briefly describe the campaign goal..."
-              rows={3}
-              className="w-full px-3.5 py-2.5 rounded-xl text-sm outline-none transition-all resize-none"
-              style={{ ...inputStyle }}
-              onFocus={e => { e.currentTarget.style.borderColor = PRIMARY; e.currentTarget.style.boxShadow = `0 0 0 3px rgba(14,165,233,0.1)`; }}
-              onBlur={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.boxShadow = "none"; }}
-            />
-          </div>
-        </div>
+      {/* ── Campaign Name ── */}
+      <div className="rounded-2xl p-5 space-y-1.5" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+        <label className="text-xs font-semibold tracking-wide uppercase" style={{ color: DIM2 }}>
+          Campaign Name <span style={{ color: "hsl(0,84%,70%)" }}>*</span>
+        </label>
+        <input
+          value={name}
+          onChange={e => setName(e.target.value)}
+          placeholder="e.g. Summer Sale 2025"
+          className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all font-medium"
+          style={inp}
+          onFocus={focusIn}
+          onBlur={focusOut}
+        />
       </div>
 
-      {/* ── Section 2: Products ── */}
-      <div className="rounded-2xl overflow-hidden" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
-        <div className="flex items-center gap-3 px-5 py-4 border-b" style={{ borderColor: BORDER }}>
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.25)" }}>
-            <ShoppingCart className="w-3.5 h-3.5" style={{ color: PURPLE }} />
-          </div>
-          <div className="flex-1">
-            <h2 className="text-sm font-bold text-white">Products in this Campaign <span style={{ color: "hsl(45,100%,60%)" }}>⭐</span></h2>
-            <p className="text-[11px]" style={{ color: DIM2 }}>Product-wise tracking for deep attribution</p>
-          </div>
-          <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: `${PURPLE}15`, color: PURPLE, border: `1px solid ${PURPLE}30` }}>
-            {products.length} product{products.length !== 1 ? "s" : ""}
-          </span>
-        </div>
+      {/* ── Divider ── */}
+      <div className="flex items-center gap-3">
+        <div className="flex-1 h-px" style={{ background: BORDER }} />
+        <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: DIM2 }}>Products</span>
+        <div className="flex-1 h-px" style={{ background: BORDER }} />
+      </div>
 
-        <div className="p-5 space-y-3">
-          {products.map((p, i) => (
-            <motion.div
-              key={p.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25 }}
-              className="rounded-xl p-4 space-y-3"
-              style={{ background: "rgba(139,92,246,0.04)", border: "1px solid rgba(139,92,246,0.15)" }}
-            >
-              <div className="flex items-center justify-between">
+      {/* ── Products ── */}
+      <div className="space-y-3">
+        {products.map((p, i) => (
+          <motion.div
+            key={p.id}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.22 }}
+            className="rounded-2xl p-5 space-y-4"
+            style={{ background: CARD, border: `1px solid ${BORDER}` }}
+          >
+            {/* Card top bar */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold" style={{ background: `${PURPLE}20`, color: PURPLE }}>
+                  {i + 1}
+                </div>
                 <span className="text-xs font-bold" style={{ color: PURPLE }}>Product #{i + 1}</span>
-                {products.length > 1 && (
-                  <button
-                    onClick={() => removeProduct(p.id)}
-                    className="text-[11px] font-semibold px-2.5 py-1 rounded-lg transition-all"
-                    style={{ color: "hsl(0,84%,70%)", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.18)" }}
-                    onMouseEnter={e => { e.currentTarget.style.background = "rgba(239,68,68,0.18)"; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = "rgba(239,68,68,0.08)"; }}
-                  >
-                    Remove
-                  </button>
-                )}
               </div>
+              {products.length > 1 && (
+                <button
+                  onClick={() => removeProduct(p.id)}
+                  className="text-[11px] font-semibold transition-all flex items-center gap-1"
+                  style={{ color: "hsl(0,84%,65%)" }}
+                  onMouseEnter={e => { e.currentTarget.style.color = "hsl(0,84%,75%)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.color = "hsl(0,84%,65%)"; }}
+                >
+                  <Trash2 className="w-3 h-3" />
+                  Remove
+                </button>
+              )}
+            </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-semibold" style={labelStyle}>Product Name <span style={{ color: "hsl(0,84%,70%)" }}>*</span></label>
+            {/* Name + Price */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-semibold" style={{ color: DIM2 }}>
+                  Product Name <span style={{ color: "hsl(0,84%,70%)" }}>*</span>
+                </label>
+                <input
+                  value={p.name}
+                  onChange={e => updateProduct(p.id, "name", e.target.value)}
+                  placeholder="Mamaearth Shampoo"
+                  className="w-full px-3.5 py-2.5 rounded-xl text-sm outline-none transition-all"
+                  style={inp}
+                  onFocus={focusIn}
+                  onBlur={focusOut}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-semibold" style={{ color: DIM2 }}>
+                  Product Price <span style={{ color: "hsl(0,84%,70%)" }}>*</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold select-none" style={{ color: DIM }}>₹</span>
                   <input
-                    value={p.name}
-                    onChange={e => updateProduct(p.id, "name", e.target.value)}
-                    placeholder="e.g. Mamaearth Shampoo"
-                    className="w-full px-3 py-2 rounded-lg text-xs outline-none transition-all"
-                    style={inputStyle}
-                    onFocus={e => { e.currentTarget.style.borderColor = PURPLE; e.currentTarget.style.boxShadow = `0 0 0 3px rgba(139,92,246,0.1)`; }}
-                    onBlur={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.boxShadow = "none"; }}
+                    value={p.price}
+                    onChange={e => updateProduct(p.id, "price", e.target.value.replace(/\D/g, ""))}
+                    placeholder="500"
+                    className="w-full pl-8 pr-3.5 py-2.5 rounded-xl text-sm outline-none transition-all"
+                    style={inp}
+                    onFocus={focusIn}
+                    onBlur={focusOut}
                   />
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-semibold" style={labelStyle}>Product Price <span style={{ color: "hsl(0,84%,70%)" }}>*</span></label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-semibold" style={{ color: DIM }}>₹</span>
+              </div>
+            </div>
+
+            {/* Original product link */}
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-semibold" style={{ color: DIM2 }}>Original Product Link</label>
+              <div className="relative">
+                <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" style={{ color: DIM2 }} />
+                <input
+                  value={p.originalLink}
+                  onChange={e => updateProduct(p.id, "originalLink", e.target.value)}
+                  placeholder="https://mamaearth.in/shampoo"
+                  className="w-full pl-9 pr-3.5 py-2.5 rounded-xl text-sm outline-none transition-all"
+                  style={inp}
+                  onFocus={focusIn}
+                  onBlur={focusOut}
+                />
+              </div>
+            </div>
+
+            {/* Tracking link */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-semibold" style={{ color: DIM2 }}>Tracking Link (Auto-generated)</label>
+                <button
+                  onClick={() => copyLink(p.id, p.trackingLink)}
+                  className="flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-lg transition-all"
+                  style={{
+                    background: copied === p.id ? "rgba(34,197,94,0.12)" : `${PRIMARY}15`,
+                    color: copied === p.id ? GREEN : PRIMARY,
+                    border: `1px solid ${copied === p.id ? "rgba(34,197,94,0.25)" : `${PRIMARY}25`}`,
+                  }}
+                >
+                  {copied === p.id ? <CheckCircle2 className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                  {copied === p.id ? "Copied!" : "Copy Link"}
+                </button>
+              </div>
+              <div
+                className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl"
+                style={{ background: "rgba(14,165,233,0.06)", border: "1px solid rgba(14,165,233,0.18)" }}
+              >
+                <Link2 className="w-3.5 h-3.5 shrink-0" style={{ color: PRIMARY }} />
+                <span className="text-[12px] font-mono truncate flex-1" style={{ color: "rgba(255,255,255,0.75)" }}>
+                  {p.trackingLink}
+                </span>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+
+        {/* Add product */}
+        <button
+          onClick={addProduct}
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-sm font-semibold border-dashed transition-all"
+          style={{ border: `1.5px dashed rgba(139,92,246,0.35)`, color: PURPLE }}
+          onMouseEnter={e => { e.currentTarget.style.background = "rgba(139,92,246,0.05)"; e.currentTarget.style.borderColor = "rgba(139,92,246,0.55)"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(139,92,246,0.35)"; }}
+        >
+          <Plus className="w-4 h-4" />
+          Add Another Product
+        </button>
+      </div>
+
+      {/* ── Divider ── */}
+      <div className="flex items-center gap-3">
+        <div className="flex-1 h-px" style={{ background: BORDER }} />
+        <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: DIM2 }}>Influencers</span>
+        <div className="flex-1 h-px" style={{ background: BORDER }} />
+      </div>
+
+      {/* ── Influencers table ── */}
+      <div className="rounded-2xl overflow-hidden" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+        {/* Table header */}
+        <div className="grid grid-cols-[auto_1fr_160px] gap-0 px-4 py-2.5 border-b" style={{ borderColor: BORDER }}>
+          <div className="w-8" />
+          <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: DIM2 }}>Select Influencer</span>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-right" style={{ color: DIM2 }}>Cost Paid (₹)</span>
+        </div>
+
+        <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+          {influencerExtData.map((inf, i) => {
+            const state   = influencerCosts[inf.handle];
+            const isSel   = state?.selected ?? false;
+            return (
+              <div
+                key={inf.handle}
+                className="grid grid-cols-[auto_1fr_160px] items-center gap-0 px-4 py-3.5 transition-all"
+                style={{ background: isSel ? `${inf.c1}0a` : "transparent" }}
+              >
+                {/* Checkbox col */}
+                <button
+                  onClick={() => toggleInfluencer(inf.handle)}
+                  className="w-8 flex items-center justify-center shrink-0"
+                >
+                  <div
+                    className="w-5 h-5 rounded-md flex items-center justify-center transition-all"
+                    style={{
+                      background: isSel ? inf.c1 : "transparent",
+                      border: isSel ? `1.5px solid ${inf.c1}` : "1.5px solid rgba(255,255,255,0.18)",
+                    }}
+                  >
+                    {isSel && (
+                      <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                        <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    )}
+                  </div>
+                </button>
+
+                {/* Info col */}
+                <button onClick={() => toggleInfluencer(inf.handle)} className="flex items-center gap-3 text-left min-w-0">
+                  <div
+                    className="w-9 h-9 rounded-xl shrink-0 flex items-center justify-center text-xs font-bold"
+                    style={{ background: `linear-gradient(135deg, ${inf.c1}, ${inf.c2})`, color: "white" }}
+                  >
+                    {inf.avatar}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold text-white truncate">{inf.handle}</div>
+                    <div className="flex items-center gap-1.5 text-[11px]" style={{ color: DIM2 }}>
+                      <span style={{ color: inf.c1 }}>{inf.niche}</span>
+                      <span>·</span>
+                      <span>{inf.followers} followers</span>
+                    </div>
+                  </div>
+                </button>
+
+                {/* Cost input col */}
+                <div className="flex justify-end">
+                  <div className="relative w-36">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-semibold select-none" style={{ color: isSel ? DIM : "rgba(255,255,255,0.15)" }}>₹</span>
                     <input
-                      value={p.price}
-                      onChange={e => updateProduct(p.id, "price", e.target.value.replace(/\D/g, ""))}
-                      placeholder="500"
-                      className="w-full pl-6 pr-3 py-2 rounded-lg text-xs outline-none transition-all"
-                      style={inputStyle}
-                      onFocus={e => { e.currentTarget.style.borderColor = PURPLE; e.currentTarget.style.boxShadow = `0 0 0 3px rgba(139,92,246,0.1)`; }}
-                      onBlur={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.boxShadow = "none"; }}
+                      value={state?.cost ?? ""}
+                      onChange={e => setInfluencerCost(inf.handle, e.target.value.replace(/\D/g, ""))}
+                      placeholder={isSel ? "10,000" : "—"}
+                      disabled={!isSel}
+                      className="w-full pl-7 pr-3 py-2 rounded-xl text-sm outline-none transition-all text-right"
+                      style={{
+                        background: isSel ? "rgba(255,255,255,0.05)" : "transparent",
+                        border: isSel ? `1px solid ${BORDER}` : "1px solid transparent",
+                        color: isSel ? "white" : "rgba(255,255,255,0.15)",
+                        cursor: isSel ? "text" : "default",
+                        caretColor: PRIMARY,
+                      }}
+                      onFocus={focusIn}
+                      onBlur={focusOut}
                     />
                   </div>
                 </div>
               </div>
-
-              {/* Tracking link */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-[11px] font-semibold" style={labelStyle}>Tracking Link</label>
-                  <button
-                    onClick={() => generateLink(p.id)}
-                    className="flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-lg transition-all"
-                    style={{ background: `${PRIMARY}15`, color: PRIMARY, border: `1px solid ${PRIMARY}25` }}
-                    onMouseEnter={e => { e.currentTarget.style.background = `${PRIMARY}25`; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = `${PRIMARY}15`; }}
-                  >
-                    <Zap className="w-3 h-3" />
-                    Generate Link
-                  </button>
-                </div>
-                <div
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg group cursor-pointer"
-                  style={{ background: "rgba(14,165,233,0.05)", border: `1px solid rgba(14,165,233,0.15)` }}
-                >
-                  <Link2 className="w-3.5 h-3.5 shrink-0" style={{ color: p.link ? PRIMARY : DIM2 }} />
-                  <span className="text-[11px] font-mono flex-1 truncate" style={{ color: p.link ? "rgba(255,255,255,0.8)" : DIM2 }}>
-                    {p.link || "Click 'Generate Link' to create tracking URL"}
-                  </span>
-                  {p.link && (
-                    <Copy className="w-3 h-3 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: PRIMARY }} />
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          ))}
-
-          {/* Add product button */}
-          <button
-            onClick={addProduct}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold border-dashed transition-all"
-            style={{ background: "transparent", border: `1.5px dashed rgba(139,92,246,0.3)`, color: PURPLE }}
-            onMouseEnter={e => { e.currentTarget.style.background = "rgba(139,92,246,0.06)"; e.currentTarget.style.borderColor = `rgba(139,92,246,0.5)`; }}
-            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = `rgba(139,92,246,0.3)`; }}
-          >
-            <Plus className="w-4 h-4" />
-            Add Another Product
-          </button>
-
-          {/* Tip box */}
-          <div className="flex items-start gap-3 px-4 py-3 rounded-xl" style={{ background: "rgba(45,100,60,0.06)", border: "1px solid rgba(34,197,94,0.18)" }}>
-            <span className="text-base shrink-0 mt-0.5">💡</span>
-            <p className="text-[12px] leading-relaxed" style={{ color: DIM }}>
-              Har product ka alag tracking link hoga. Isse aap dekh sakte hain ki konsa product zyada sell ho raha hai, aur kis product ke liye log Google search, WhatsApp ya DM se aa rahe hain.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Section 3: Select Influencers ── */}
-      <div className="rounded-2xl overflow-hidden" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
-        <div className="flex items-center gap-3 px-5 py-4 border-b" style={{ borderColor: BORDER }}>
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(249,115,22,0.12)", border: "1px solid rgba(249,115,22,0.25)" }}>
-            <Users className="w-3.5 h-3.5" style={{ color: "#F97316" }} />
-          </div>
-          <div className="flex-1">
-            <h2 className="text-sm font-bold text-white">Select Influencers</h2>
-            <p className="text-[11px]" style={{ color: DIM2 }}>Choose who will promote this campaign</p>
-          </div>
-          {selectedInfluencers.length > 0 && (
-            <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: "rgba(249,115,22,0.12)", color: "#F97316", border: "1px solid rgba(249,115,22,0.25)" }}>
-              {selectedInfluencers.length} selected
-            </span>
-          )}
-        </div>
-
-        <div className="p-5 space-y-3">
-          {influencerExtData.map((inf, i) => {
-            const isSelected = selectedInfluencers.includes(inf.handle);
-            return (
-              <motion.button
-                key={inf.handle}
-                onClick={() => toggleInfluencer(inf.handle)}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.25, delay: i * 0.05 }}
-                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all text-left"
-                style={{
-                  background: isSelected ? `${inf.c1}12` : "rgba(255,255,255,0.02)",
-                  border: isSelected ? `1px solid ${inf.c1}40` : `1px solid rgba(255,255,255,0.06)`,
-                  boxShadow: isSelected ? `0 0 0 0 ${inf.c1}` : "none",
-                }}
-                onMouseEnter={e => { if (!isSelected) { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; } }}
-                onMouseLeave={e => { if (!isSelected) { e.currentTarget.style.background = "rgba(255,255,255,0.02)"; } }}
-              >
-                {/* Checkbox */}
-                <div
-                  className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-all"
-                  style={{
-                    background: isSelected ? inf.c1 : "transparent",
-                    border: isSelected ? `1.5px solid ${inf.c1}` : `1.5px solid rgba(255,255,255,0.2)`,
-                  }}
-                >
-                  {isSelected && (
-                    <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                      <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  )}
-                </div>
-
-                {/* Avatar */}
-                <div
-                  className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold shrink-0"
-                  style={{ background: `linear-gradient(135deg, ${inf.c1}, ${inf.c2})`, color: "white" }}
-                >
-                  {inf.avatar}
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-white">{inf.handle}</div>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[11px] font-medium" style={{ color: inf.c1 }}>{inf.niche}</span>
-                    <span className="text-[10px]" style={{ color: DIM2 }}>· {inf.followers} followers</span>
-                  </div>
-                </div>
-
-                {/* ROAS badge */}
-                <div className="text-right shrink-0">
-                  <div className="text-[10px]" style={{ color: DIM2 }}>Avg ROAS</div>
-                  <div className="text-sm font-bold" style={{ color: GREEN }}>{inf.roas}×</div>
-                </div>
-              </motion.button>
             );
           })}
+        </div>
 
-          {/* Create new influencer */}
+        {/* Add new influencer */}
+        <div className="px-4 py-3 border-t" style={{ borderColor: BORDER }}>
           <button
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold border-dashed transition-all"
-            style={{ background: "transparent", border: "1.5px dashed rgba(249,115,22,0.3)", color: "#F97316" }}
-            onMouseEnter={e => { e.currentTarget.style.background = "rgba(249,115,22,0.06)"; e.currentTarget.style.borderColor = "rgba(249,115,22,0.5)"; }}
-            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(249,115,22,0.3)"; }}
+            className="flex items-center gap-2 text-xs font-semibold transition-all"
+            style={{ color: PRIMARY }}
+            onMouseEnter={e => { e.currentTarget.style.opacity = "0.75"; }}
+            onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}
           >
             <Plus className="w-3.5 h-3.5" />
-            Create New Influencer
+            Add New Influencer
           </button>
         </div>
       </div>
 
-      {/* ── Footer buttons ── */}
-      <div className="flex items-center justify-end gap-3 pb-2">
+      {/* ── Divider ── */}
+      <div className="h-px" style={{ background: BORDER }} />
+
+      {/* ── ROAS tip ── */}
+      <div className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background: "rgba(14,165,233,0.06)", border: "1px solid rgba(14,165,233,0.15)" }}>
+        <span className="text-base">💡</span>
+        <p className="text-xs" style={{ color: DIM }}>
+          <span className="font-bold text-white">ROAS</span> = Total Sales ÷ Total Cost Paid to Influencers
+        </p>
+      </div>
+
+      {/* ── Footer ── */}
+      <div className="flex items-center justify-end gap-3">
         <button
           onClick={onClose}
           className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all"
@@ -853,15 +832,14 @@ function NewCampaignForm({ onClose }: { onClose: () => void }) {
           Cancel
         </button>
         <button
-          onClick={() => { if (name && budget) setSubmitted(true); }}
-          className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all"
+          onClick={() => { if (canSubmit) setSubmitted(true); }}
+          className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all"
           style={{
-            background: name && budget ? PRIMARY : "rgba(14,165,233,0.25)",
-            color: name && budget ? "hsl(222,47%,6%)" : DIM,
-            cursor: name && budget ? "pointer" : "not-allowed",
+            background: canSubmit ? PRIMARY : "rgba(14,165,233,0.2)",
+            color: canSubmit ? "hsl(222,47%,6%)" : "rgba(255,255,255,0.3)",
+            cursor: canSubmit ? "pointer" : "not-allowed",
+            boxShadow: canSubmit ? `0 4px 20px rgba(14,165,233,0.3)` : "none",
           }}
-          onMouseEnter={e => { if (name && budget) { e.currentTarget.style.opacity = "0.9"; } }}
-          onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}
         >
           <Zap className="w-4 h-4" />
           Create Campaign
