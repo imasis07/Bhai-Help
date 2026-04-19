@@ -1828,8 +1828,10 @@ export default function MainDashboard() {
     <div className="flex h-screen overflow-hidden" style={{ background: BG }}>
 
       {/* ══ SIDEBAR desktop ══ */}
+      {/* Spacer to reserve collapsed width so content doesn't go under sidebar */}
+      <div className="hidden md:block shrink-0" style={{ width: 56 }} />
       <motion.aside
-        className="hidden md:flex flex-col shrink-0 h-full border-r overflow-hidden"
+        className="hidden md:flex flex-col h-full border-r overflow-hidden absolute top-0 left-0 z-20"
         style={{ background: SIDEBAR, borderColor: BORDER }}
         animate={{ width: sidebarHovered ? 224 : 56 }}
         transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
