@@ -427,9 +427,458 @@ function InfluencerDetailView({ inf, onBack }: { inf: typeof influencerExtData[0
   );
 }
 
-/* ─── Campaigns Section component ─── */
+/* ─── New Campaign Form ─── */
+function NewCampaignForm({ onClose }: { onClose: () => void }) {
+  const [name,        setName]        = useState("");
+  const [startDate,   setStartDate]   = useState("");
+  const [endDate,     setEndDate]     = useState("");
+  const [budget,      setBudget]      = useState("");
+  const [description, setDescription] = useState("");
+  const [products, setProducts] = useState([
+    { id: 1, name: "", price: "", link: "" },
+  ]);
+  const [selectedInfluencers, setSelectedInfluencers] = useState<string[]>([]);
+  const [submitted, setSubmitted] = useState(false);
+
+  function generateLink(id: number) {
+    const hash = Math.random().toString(36).slice(2, 9);
+    setProducts(ps => ps.map(p => p.id === id ? { ...p, link: `https://roastrack.in/track/${hash}` } : p));
+  }
+  function addProduct() {
+    setProducts(ps => [...ps, { id: Date.now(), name: "", price: "", link: "" }]);
+  }
+  function removeProduct(id: number) {
+    setProducts(ps => ps.filter(p => p.id !== id));
+  }
+  function updateProduct(id: number, field: "name" | "price", value: string) {
+    setProducts(ps => ps.map(p => p.id === id ? { ...p, [field]: value } : p));
+  }
+  function toggleInfluencer(handle: string) {
+    setSelectedInfluencers(prev =>
+      prev.includes(handle) ? prev.filter(h => h !== handle) : [...prev, handle]
+    );
+  }
+
+  if (submitted) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="flex flex-col items-center justify-center py-24 gap-5"
+      >
+        <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.3)" }}>
+          <CheckCircle2 className="w-8 h-8" style={{ color: GREEN }} />
+        </div>
+        <div className="text-center">
+          <h2 className="text-xl font-bold text-white mb-1">Campaign Created! 🎉</h2>
+          <p className="text-sm" style={{ color: DIM }}>"{name || "New Campaign"}" has been added to your campaigns.</p>
+        </div>
+        <button
+          onClick={onClose}
+          className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
+          style={{ background: PRIMARY, color: "hsl(222,47%,6%)" }}
+        >
+          Back to Campaigns
+        </button>
+      </motion.div>
+    );
+  }
+
+  const inputStyle = {
+    background: "rgba(255,255,255,0.04)",
+    border: `1px solid ${BORDER}`,
+    color: "white",
+    caretColor: PRIMARY,
+  } as React.CSSProperties;
+
+  const labelStyle = { color: DIM2 } as React.CSSProperties;
+  const accentInputStyle = { borderColor: PRIMARY } as React.CSSProperties;
+
+  return (
+    <motion.div
+      key="new-campaign"
+      initial={{ opacity: 0, x: 24 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -24 }}
+      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+      className="space-y-5"
+    >
+      {/* ── Header ── */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onClose}
+            className="flex items-center gap-2 text-sm font-medium transition-all group"
+            style={{ color: DIM }}
+            onMouseEnter={e => { e.currentTarget.style.color = "white"; }}
+            onMouseLeave={e => { e.currentTarget.style.color = DIM; }}
+          >
+            <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+            Campaigns
+          </button>
+          <span style={{ color: DIM2 }}>/</span>
+          <span className="text-sm font-semibold text-white">New Campaign</span>
+        </div>
+        <button
+          onClick={onClose}
+          className="w-8 h-8 rounded-xl flex items-center justify-center transition-all"
+          style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${BORDER}` }}
+          onMouseEnter={e => { e.currentTarget.style.background = "rgba(239,68,68,0.1)"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}
+        >
+          <X className="w-4 h-4" style={{ color: DIM }} />
+        </button>
+      </div>
+
+      {/* ── Section 1: Campaign Details ── */}
+      <div className="rounded-2xl overflow-hidden" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+        {/* Section header */}
+        <div className="flex items-center gap-3 px-5 py-4 border-b" style={{ borderColor: BORDER }}>
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(14,165,233,0.12)", border: "1px solid rgba(14,165,233,0.25)" }}>
+            <FileText className="w-3.5 h-3.5" style={{ color: PRIMARY }} />
+          </div>
+          <div>
+            <h2 className="text-sm font-bold text-white">Campaign Details</h2>
+            <p className="text-[11px]" style={{ color: DIM2 }}>Basic info about your campaign</p>
+          </div>
+        </div>
+
+        <div className="p-5 space-y-4">
+          {/* Name */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold" style={labelStyle}>Campaign Name <span style={{ color: "hsl(0,84%,70%)" }}>*</span></label>
+            <input
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="e.g. Summer Sale 2025"
+              className="w-full px-3.5 py-2.5 rounded-xl text-sm outline-none transition-all"
+              style={{ ...inputStyle, ...(name ? accentInputStyle : {}) }}
+              onFocus={e => { e.currentTarget.style.borderColor = PRIMARY; e.currentTarget.style.boxShadow = `0 0 0 3px rgba(14,165,233,0.1)`; }}
+              onBlur={e => { e.currentTarget.style.borderColor = name ? PRIMARY : BORDER; e.currentTarget.style.boxShadow = "none"; }}
+            />
+          </div>
+
+          {/* Date range */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold" style={labelStyle}>Campaign Period <span style={{ color: "hsl(0,84%,70%)" }}>*</span></label>
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1">
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" style={{ color: DIM2 }} />
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={e => setStartDate(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2.5 rounded-xl text-sm outline-none transition-all"
+                  style={{ ...inputStyle, colorScheme: "dark" }}
+                  onFocus={e => { e.currentTarget.style.borderColor = PRIMARY; e.currentTarget.style.boxShadow = `0 0 0 3px rgba(14,165,233,0.1)`; }}
+                  onBlur={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.boxShadow = "none"; }}
+                />
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0" style={{ color: DIM2 }}>
+                <div className="h-px w-3" style={{ background: DIM2 }} />
+                <ArrowUpRight className="w-3.5 h-3.5 rotate-45" />
+                <div className="h-px w-3" style={{ background: DIM2 }} />
+              </div>
+              <div className="relative flex-1">
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" style={{ color: DIM2 }} />
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={e => setEndDate(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2.5 rounded-xl text-sm outline-none transition-all"
+                  style={{ ...inputStyle, colorScheme: "dark" }}
+                  onFocus={e => { e.currentTarget.style.borderColor = PRIMARY; e.currentTarget.style.boxShadow = `0 0 0 3px rgba(14,165,233,0.1)`; }}
+                  onBlur={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.boxShadow = "none"; }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Budget */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold" style={labelStyle}>Total Budget <span style={{ color: "hsl(0,84%,70%)" }}>*</span></label>
+            <div className="relative">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold" style={{ color: DIM }}>₹</span>
+              <input
+                value={budget}
+                onChange={e => setBudget(e.target.value.replace(/\D/g, ""))}
+                placeholder="50,000"
+                className="w-full pl-8 pr-3.5 py-2.5 rounded-xl text-sm outline-none transition-all"
+                style={{ ...inputStyle, ...(budget ? accentInputStyle : {}) }}
+                onFocus={e => { e.currentTarget.style.borderColor = PRIMARY; e.currentTarget.style.boxShadow = `0 0 0 3px rgba(14,165,233,0.1)`; }}
+                onBlur={e => { e.currentTarget.style.borderColor = budget ? PRIMARY : BORDER; e.currentTarget.style.boxShadow = "none"; }}
+              />
+            </div>
+          </div>
+
+          {/* Description */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold" style={labelStyle}>Description <span className="font-normal" style={{ color: DIM2 }}>(optional)</span></label>
+            <textarea
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              placeholder="Briefly describe the campaign goal..."
+              rows={3}
+              className="w-full px-3.5 py-2.5 rounded-xl text-sm outline-none transition-all resize-none"
+              style={{ ...inputStyle }}
+              onFocus={e => { e.currentTarget.style.borderColor = PRIMARY; e.currentTarget.style.boxShadow = `0 0 0 3px rgba(14,165,233,0.1)`; }}
+              onBlur={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.boxShadow = "none"; }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* ── Section 2: Products ── */}
+      <div className="rounded-2xl overflow-hidden" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+        <div className="flex items-center gap-3 px-5 py-4 border-b" style={{ borderColor: BORDER }}>
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.25)" }}>
+            <ShoppingCart className="w-3.5 h-3.5" style={{ color: PURPLE }} />
+          </div>
+          <div className="flex-1">
+            <h2 className="text-sm font-bold text-white">Products in this Campaign <span style={{ color: "hsl(45,100%,60%)" }}>⭐</span></h2>
+            <p className="text-[11px]" style={{ color: DIM2 }}>Product-wise tracking for deep attribution</p>
+          </div>
+          <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: `${PURPLE}15`, color: PURPLE, border: `1px solid ${PURPLE}30` }}>
+            {products.length} product{products.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+
+        <div className="p-5 space-y-3">
+          {products.map((p, i) => (
+            <motion.div
+              key={p.id}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25 }}
+              className="rounded-xl p-4 space-y-3"
+              style={{ background: "rgba(139,92,246,0.04)", border: "1px solid rgba(139,92,246,0.15)" }}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold" style={{ color: PURPLE }}>Product #{i + 1}</span>
+                {products.length > 1 && (
+                  <button
+                    onClick={() => removeProduct(p.id)}
+                    className="text-[11px] font-semibold px-2.5 py-1 rounded-lg transition-all"
+                    style={{ color: "hsl(0,84%,70%)", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.18)" }}
+                    onMouseEnter={e => { e.currentTarget.style.background = "rgba(239,68,68,0.18)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = "rgba(239,68,68,0.08)"; }}
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-semibold" style={labelStyle}>Product Name <span style={{ color: "hsl(0,84%,70%)" }}>*</span></label>
+                  <input
+                    value={p.name}
+                    onChange={e => updateProduct(p.id, "name", e.target.value)}
+                    placeholder="e.g. Mamaearth Shampoo"
+                    className="w-full px-3 py-2 rounded-lg text-xs outline-none transition-all"
+                    style={inputStyle}
+                    onFocus={e => { e.currentTarget.style.borderColor = PURPLE; e.currentTarget.style.boxShadow = `0 0 0 3px rgba(139,92,246,0.1)`; }}
+                    onBlur={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.boxShadow = "none"; }}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-semibold" style={labelStyle}>Product Price <span style={{ color: "hsl(0,84%,70%)" }}>*</span></label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-semibold" style={{ color: DIM }}>₹</span>
+                    <input
+                      value={p.price}
+                      onChange={e => updateProduct(p.id, "price", e.target.value.replace(/\D/g, ""))}
+                      placeholder="500"
+                      className="w-full pl-6 pr-3 py-2 rounded-lg text-xs outline-none transition-all"
+                      style={inputStyle}
+                      onFocus={e => { e.currentTarget.style.borderColor = PURPLE; e.currentTarget.style.boxShadow = `0 0 0 3px rgba(139,92,246,0.1)`; }}
+                      onBlur={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.boxShadow = "none"; }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Tracking link */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-semibold" style={labelStyle}>Tracking Link</label>
+                  <button
+                    onClick={() => generateLink(p.id)}
+                    className="flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-lg transition-all"
+                    style={{ background: `${PRIMARY}15`, color: PRIMARY, border: `1px solid ${PRIMARY}25` }}
+                    onMouseEnter={e => { e.currentTarget.style.background = `${PRIMARY}25`; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = `${PRIMARY}15`; }}
+                  >
+                    <Zap className="w-3 h-3" />
+                    Generate Link
+                  </button>
+                </div>
+                <div
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg group cursor-pointer"
+                  style={{ background: "rgba(14,165,233,0.05)", border: `1px solid rgba(14,165,233,0.15)` }}
+                >
+                  <Link2 className="w-3.5 h-3.5 shrink-0" style={{ color: p.link ? PRIMARY : DIM2 }} />
+                  <span className="text-[11px] font-mono flex-1 truncate" style={{ color: p.link ? "rgba(255,255,255,0.8)" : DIM2 }}>
+                    {p.link || "Click 'Generate Link' to create tracking URL"}
+                  </span>
+                  {p.link && (
+                    <Copy className="w-3 h-3 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: PRIMARY }} />
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          ))}
+
+          {/* Add product button */}
+          <button
+            onClick={addProduct}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold border-dashed transition-all"
+            style={{ background: "transparent", border: `1.5px dashed rgba(139,92,246,0.3)`, color: PURPLE }}
+            onMouseEnter={e => { e.currentTarget.style.background = "rgba(139,92,246,0.06)"; e.currentTarget.style.borderColor = `rgba(139,92,246,0.5)`; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = `rgba(139,92,246,0.3)`; }}
+          >
+            <Plus className="w-4 h-4" />
+            Add Another Product
+          </button>
+
+          {/* Tip box */}
+          <div className="flex items-start gap-3 px-4 py-3 rounded-xl" style={{ background: "rgba(45,100,60,0.06)", border: "1px solid rgba(34,197,94,0.18)" }}>
+            <span className="text-base shrink-0 mt-0.5">💡</span>
+            <p className="text-[12px] leading-relaxed" style={{ color: DIM }}>
+              Har product ka alag tracking link hoga. Isse aap dekh sakte hain ki konsa product zyada sell ho raha hai, aur kis product ke liye log Google search, WhatsApp ya DM se aa rahe hain.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Section 3: Select Influencers ── */}
+      <div className="rounded-2xl overflow-hidden" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+        <div className="flex items-center gap-3 px-5 py-4 border-b" style={{ borderColor: BORDER }}>
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(249,115,22,0.12)", border: "1px solid rgba(249,115,22,0.25)" }}>
+            <Users className="w-3.5 h-3.5" style={{ color: "#F97316" }} />
+          </div>
+          <div className="flex-1">
+            <h2 className="text-sm font-bold text-white">Select Influencers</h2>
+            <p className="text-[11px]" style={{ color: DIM2 }}>Choose who will promote this campaign</p>
+          </div>
+          {selectedInfluencers.length > 0 && (
+            <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: "rgba(249,115,22,0.12)", color: "#F97316", border: "1px solid rgba(249,115,22,0.25)" }}>
+              {selectedInfluencers.length} selected
+            </span>
+          )}
+        </div>
+
+        <div className="p-5 space-y-3">
+          {influencerExtData.map((inf, i) => {
+            const isSelected = selectedInfluencers.includes(inf.handle);
+            return (
+              <motion.button
+                key={inf.handle}
+                onClick={() => toggleInfluencer(inf.handle)}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25, delay: i * 0.05 }}
+                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all text-left"
+                style={{
+                  background: isSelected ? `${inf.c1}12` : "rgba(255,255,255,0.02)",
+                  border: isSelected ? `1px solid ${inf.c1}40` : `1px solid rgba(255,255,255,0.06)`,
+                  boxShadow: isSelected ? `0 0 0 0 ${inf.c1}` : "none",
+                }}
+                onMouseEnter={e => { if (!isSelected) { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; } }}
+                onMouseLeave={e => { if (!isSelected) { e.currentTarget.style.background = "rgba(255,255,255,0.02)"; } }}
+              >
+                {/* Checkbox */}
+                <div
+                  className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-all"
+                  style={{
+                    background: isSelected ? inf.c1 : "transparent",
+                    border: isSelected ? `1.5px solid ${inf.c1}` : `1.5px solid rgba(255,255,255,0.2)`,
+                  }}
+                >
+                  {isSelected && (
+                    <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                      <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  )}
+                </div>
+
+                {/* Avatar */}
+                <div
+                  className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold shrink-0"
+                  style={{ background: `linear-gradient(135deg, ${inf.c1}, ${inf.c2})`, color: "white" }}
+                >
+                  {inf.avatar}
+                </div>
+
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-semibold text-white">{inf.handle}</div>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="text-[11px] font-medium" style={{ color: inf.c1 }}>{inf.niche}</span>
+                    <span className="text-[10px]" style={{ color: DIM2 }}>· {inf.followers} followers</span>
+                  </div>
+                </div>
+
+                {/* ROAS badge */}
+                <div className="text-right shrink-0">
+                  <div className="text-[10px]" style={{ color: DIM2 }}>Avg ROAS</div>
+                  <div className="text-sm font-bold" style={{ color: GREEN }}>{inf.roas}×</div>
+                </div>
+              </motion.button>
+            );
+          })}
+
+          {/* Create new influencer */}
+          <button
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold border-dashed transition-all"
+            style={{ background: "transparent", border: "1.5px dashed rgba(249,115,22,0.3)", color: "#F97316" }}
+            onMouseEnter={e => { e.currentTarget.style.background = "rgba(249,115,22,0.06)"; e.currentTarget.style.borderColor = "rgba(249,115,22,0.5)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(249,115,22,0.3)"; }}
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Create New Influencer
+          </button>
+        </div>
+      </div>
+
+      {/* ── Footer buttons ── */}
+      <div className="flex items-center justify-end gap-3 pb-2">
+        <button
+          onClick={onClose}
+          className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all"
+          style={{ background: "rgba(255,255,255,0.05)", color: DIM, border: `1px solid ${BORDER}` }}
+          onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.09)"; e.currentTarget.style.color = "white"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.color = DIM; }}
+        >
+          Cancel
+        </button>
+        <button
+          onClick={() => { if (name && budget) setSubmitted(true); }}
+          className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all"
+          style={{
+            background: name && budget ? PRIMARY : "rgba(14,165,233,0.25)",
+            color: name && budget ? "hsl(222,47%,6%)" : DIM,
+            cursor: name && budget ? "pointer" : "not-allowed",
+          }}
+          onMouseEnter={e => { if (name && budget) { e.currentTarget.style.opacity = "0.9"; } }}
+          onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}
+        >
+          <Zap className="w-4 h-4" />
+          Create Campaign
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ─── Campaigns Section ─── */
 function CampaignsSection() {
   const [campaignFilter, setCampaignFilter] = useState("All");
+  const [showNewCampaign, setShowNewCampaign] = useState(false);
+
+  if (showNewCampaign) {
+    return <NewCampaignForm onClose={() => setShowNewCampaign(false)} />;
+  }
 
   const filterTabs = [
     { label: "All Campaigns", key: "All",    count: campaigns.length },
@@ -456,6 +905,7 @@ function CampaignsSection() {
           <p className="text-sm mt-0.5" style={{ color: DIM }}>Manage your influencer campaigns</p>
         </div>
         <button
+          onClick={() => setShowNewCampaign(true)}
           className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
           style={{ background: PRIMARY, color: "hsl(222,47%,6%)" }}
         >
